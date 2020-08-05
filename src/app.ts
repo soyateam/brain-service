@@ -6,7 +6,6 @@ import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
 import helmet from 'helmet';
 import { errorHandler } from './utils/error.handler';
-import './db_config'; // Create mongodb connections
 
 // App initialization
 const app = express();

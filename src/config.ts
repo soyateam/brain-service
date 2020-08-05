@@ -1,9 +1,8 @@
 // config
 
 const config = {
-  // MongoDB Url
-  mongoUrl:
-    `mongodb://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@${process.env.MONGO_URL}`,
+  taskServiceUrl: process.env.TASK_SERVICE_URL,
+  hierarchyServiceUrl: process.env.HIERARCHY_SERVICE_URL,
 };
 
 export default config;
