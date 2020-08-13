@@ -1,0 +1,18 @@
+version: "3.5"
+services:
+  brain-service:
+    container_name: brain-service
+    image: brain-service:latest
+    command: npm run dev:watch # Hot reload
+    ports:
+      - "3000:3000" # Change it if you want
+    build:
+      context: .
+      target: DEV
+    volumes:
+      - ./src:/usr/src/app/src
+    depends_on:
+      - mongo
+    restart: always
+  mongo:
+    image: mongo:latest
