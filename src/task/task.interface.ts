@@ -1,16 +1,15 @@
 // task.interface
-import { ITag } from '../tag/tag.interface';
 
 enum TaskType {
-  TYPE1,
-  TYPE2,
+  BuildForce = 'BuildForce',
+  OperativeForce = 'OperativeForce',
 }
 
 export interface ITask {
-  parentId: string;
+  parent: string;
   type: TaskType;
   name: string;
   description: string;
-  tag: ITag;
-  organizationIds: string[];
+  orgIds: string[];
+  ancestors: string[];
 }
