@@ -15,6 +15,6 @@ export interface ITask {
   type: TaskType;
   name: string;
   description: string;
-  groups: IGroup;
+  groups: IGroup[];
   ancestors: string[];
 }
