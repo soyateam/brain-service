@@ -1,6 +1,7 @@
 // app
 
 import express from 'express';
+import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
@@ -10,6 +11,16 @@ import { TaskRouter } from './task/task.routes';
 
 // App initialization
 const app = express();
+
+const options:cors.CorsOptions = {
+  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'X-Access-Token', 'authorization'],
+  credentials: true,
+  methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
+  origin: '*',
+  preflightContinue: false,
+};
+
+app.use(cors(options));
 
 // Morgan formatting types for each environment
 const morganFormatting: any = { prod: 'common', dev: 'dev', test: 'tiny' };
