@@ -10,7 +10,6 @@ export class TaskRouter {
     router.get('/type/:type',
                Wrapper.wrapAsync(TaskController.getTasksByType));
     router.get('/parent/:parentId', Wrapper.wrapAsync(TaskController.getTasksByParentId));
-    router.get('/stats/:type', Wrapper.wrapAsync(TaskController.getStats));
     router.get('/:id', Wrapper.wrapAsync(TaskController.getTaskById));
     router.post('/', Wrapper.wrapAsync(TaskController.createTask));
     router.put('/', Wrapper.wrapAsync(TaskController.updateTask));
