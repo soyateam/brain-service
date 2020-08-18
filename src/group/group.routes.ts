@@ -8,8 +8,8 @@ export class GroupRouter {
   public static router() {
     const router: Router = Router();
 
-    router.get('/:id/children', Wrapper.wrapAsync(GroupController.getOrganizationChildren));
-    router.get('/:id', Wrapper.wrapAsync(GroupController.getOrganization));
+    router.get('/parent/:id', Wrapper.wrapAsync(GroupController.getGroupsByParent));
+    router.get('/:id', Wrapper.wrapAsync(GroupController.getGroupById));
 
     return router;
   }

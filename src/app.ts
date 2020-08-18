@@ -8,6 +8,7 @@ import morgan from 'morgan';
 import helmet from 'helmet';
 import { errorHandler } from './utils/error.handler';
 import { TaskRouter } from './task/task.routes';
+import { GroupRouter } from './group/group.routes';
 
 // App initialization
 const app = express();
@@ -39,6 +40,7 @@ app.use(helmet());
 app.get('/health', (req, res) => res.send('alive'));
 
 app.use('/task', TaskRouter.router());
+app.use('/group', GroupRouter.router());
 
 // Error handler
 app.use(errorHandler);
