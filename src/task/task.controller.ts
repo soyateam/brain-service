@@ -88,6 +88,7 @@ export class TaskController {
 
       }
     }
+    throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
   }
 
   /**
