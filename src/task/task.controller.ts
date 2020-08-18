@@ -116,7 +116,7 @@ export class TaskController {
       throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
     } else {
       if (req.body.task.groups) {
-        req.body.task.groups = TaskController.toUniqueGroupArray(req.body.task.groups);
+        delete req.body.task.groups;
       }
 
       const task = await HttpClient.put(TaskController.tasksUrl, { task: req.body.task });
