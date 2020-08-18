@@ -24,7 +24,7 @@ export class SharedController {
 
     if (task) {
       const group = await HttpClient.put(SharedController.groupUrl,
-                                         { isCountGrow: true, id: req.body.groupId });
+                                         { isCountGrow: true, id: req.params.id });
 
       if (group) {
         res.status(200).send(task);
