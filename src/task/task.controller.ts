@@ -1,14 +1,16 @@
 // task.controller
 
 import { Request, Response } from 'express';
-import { InvalidParameter } from '../utils/error';
+import { InvalidParameter, BadRequest } from '../utils/error';
 import { HttpClient } from '../utils/http.client';
 import config from '../config';
+import { IGroup } from './task.interface';
 
 export class TaskController {
   private static readonly ERROR_MESSAGES = {
     TASK_NOT_FOUND: 'Task was not found.',
     INVALID_PARAMETER: 'Invalid paramter was given.',
+    BAD_REQUEST: 'Cannot remove task with children.',
   };
   private static readonly tasksUrl = `${config.taskServiceUrl}/task`;
 
@@ -40,28 +42,27 @@ export class TaskController {
   }
 
   /**
-   * Gets specified statistics of a task.
-   * @param req - Express Request
-   * @param res - Express Response
-   */
-  public static async getStats(req: Request, res: Response) {
-    // Implement stats here.
-  }
-
-  /**
    * Creates a task.
    * @param req - Express Request
    * @param res - Express Response
    */
   public static async createTask(req: Request, res: Response) {
-    const createdTask = await HttpClient.post(TaskController.tasksUrl,
-                                              { task: req.body.task });
+    if (!req.body.task) {
+      throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
+    } else {
+      if (req.body.task.groups) {
+        req.body.task.groups = TaskController.toUniqueGroupArray(req.body.task.groups);
+      }
 
-    if (createdTask) {
-      return res.status(200).send(createdTask);
+      const createdTask = await HttpClient.post(TaskController.tasksUrl,
+                                                { task: req.body.task });
+
+      if (createdTask) {
+        return res.status(200).send(createdTask);
+      }
+
+      throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
     }
-
-    throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
   }
 
   /**
@@ -70,13 +71,24 @@ export class TaskController {
    * @param res - Express Response
    */
   public static async deleteTask(req: Request, res: Response) {
-    const removedTask = await HttpClient.delete(`${TaskController.tasksUrl}/${req.params.id}`);
+    // Get the children of a task to know if it has any.
+    const childTasks = (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.id || 'null'}`)).tasks;
 
-    if (removedTask) {
-      return res.status(200).send(removedTask);
+    // Checks if there are any children to this task
+    if (childTasks) {
+      // If it has children, then its not possible to remove the task.
+      if (childTasks.length > 0) {
+        throw new BadRequest(TaskController.ERROR_MESSAGES.BAD_REQUEST);
+      } else { // If it doesn't have any children, then remove the task.
+        const removedTask = await HttpClient.delete(`${TaskController.tasksUrl}/${req.params.id}`);
+
+        if (removedTask) {
+          return res.status(200).send(removedTask);
+        }
+
+        throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
+      }
     }
-
-    throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
   }
 
   /**
@@ -100,13 +112,21 @@ export class TaskController {
    * @param res - Express Response
    */
   public static async updateTask(req: Request, res: Response) {
-    const task = await HttpClient.put(TaskController.tasksUrl, { task: req.body.task });
+    if (!req.body.task) {
+      throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
+    } else {
+      if (req.body.task.groups) {
+        req.body.task.groups = TaskController.toUniqueGroupArray(req.body.task.groups);
+      }
 
-    if (task) {
-      return res.status(200).send(task);
+      const task = await HttpClient.put(TaskController.tasksUrl, { task: req.body.task });
+
+      if (task) {
+        return res.status(200).send(task);
+      }
+
+      throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
     }
-
-    throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
   }
 
   /**
@@ -122,5 +142,16 @@ export class TaskController {
     }
 
     throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
+  }
+
+  private static toUniqueGroupArray(arr: IGroup[]) {
+    if (arr.length < 2) {
+      return arr;
+    }
+
+    return (arr.filter(
+      (currGroup: IGroup, index: any, self: any) =>
+        self.findIndex((t: IGroup) => (t.id === currGroup.id) === index),
+    ));
   }
 }
