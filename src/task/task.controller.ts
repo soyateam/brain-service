@@ -86,7 +86,6 @@ export class TaskController {
           return res.status(200).send(removedTask);
         }
 
-        throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
       }
     }
   }
