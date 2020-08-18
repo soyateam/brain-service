@@ -7,40 +7,41 @@ import { NotFound } from '../utils/error';
 
 export class GroupController {
   private static readonly ERROR_MESSAGES = {
-    ORGANIZATION_NOT_FOUND: 'Group was not found.',
+    INVALID_PARAMETER: 'Invalid parameter was given.',
   };
 
   private static readonly groupUrl = `${config.groupServiceUrl}/group`;
 
   /**
-   * Gets a specific organization by the organization id
-   * from hierarchy-service.
+   * Gets groups by the groups parent id
+   * from group-service.
    * @param req - Express Request
    * @param res - Express Response
    */
-  public static async getOrganization(req: Request, res: Response) {
-    const organization = await HttpClient.get(`${GroupController.groupUrl}/${req.params.id}`);
+  public static async getGroupsByParent(req: Request, res: Response) {
+    const groups =
+      (await HttpClient.get(`${GroupController.groupUrl}/parent/${req.params.id}`)).groups;
 
-    if (organization) {
-      return res.status(200).send(organization);
+    if (groups) {
+      return res.status(200).send(groups);
     }
 
-    throw new NotFound(GroupController.ERROR_MESSAGES.ORGANIZATION_NOT_FOUND);
+    throw new NotFound(GroupController.ERROR_MESSAGES.INVALID_PARAMETER);
   }
 
     /**
-   * Gets a specific organization's children by the organization id
-   * from hierarchy-service.
+   * Gets a specific group's children by the organization id
+   * from group-service.
    * @param req - Express Request
    * @param res - Express Response
    */
-  public static async getOrganizationChildren(req: Request, res: Response) {
-    const organizationChildren = await HttpClient.get(`${GroupController.groupUrl}/${req.params.id}/children`);
+  public static async getGroupById(req: Request, res: Response) {
+    const groups = await HttpClient.get(`${GroupController.groupUrl}/${req.params.id}`);
 
-    if (organizationChildren) {
-      return res.status(200).send(organizationChildren);
+    if (groups) {
+      return res.status(200).send(groups);
     }
 
-    throw new NotFound(GroupController.ERROR_MESSAGES.ORGANIZATION_NOT_FOUND);
+    throw new NotFound(GroupController.ERROR_MESSAGES.INVALID_PARAMETER);
   }
 }

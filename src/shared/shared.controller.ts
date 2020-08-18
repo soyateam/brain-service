@@ -20,17 +20,21 @@ export class SharedController {
    * @param res - Express Response
    */
   public static async assignGroup(req: Request, res: Response) {
-    const task = await HttpClient.put(SharedController.taskUrl, { task: req.body.task });
+    if (!req.body.task || !req.params.id) {
+      throw new InvalidParameter(SharedController.ERROR_MESSAGES.INVALID_PARAMETER);
+    } else {
+      const task = await HttpClient.put(SharedController.taskUrl, { task: req.body.task });
 
-    if (task) {
-      const group = await HttpClient.put(SharedController.groupUrl,
-                                         { isCountGrow: true, id: req.params.id });
+      if (task) {
+        const group = await HttpClient.put(SharedController.groupUrl,
+                                           { isCountGrow: true, id: req.params.id });
 
-      if (group) {
-        res.status(200).send(task);
+        if (group) {
+          res.status(200).send(task);
+        }
       }
-    }
 
-    throw new InvalidParameter(SharedController.ERROR_MESSAGES.INVALID_PARAMETER);
+      throw new InvalidParameter(SharedController.ERROR_MESSAGES.INVALID_PARAMETER);
+    }
   }
 }
