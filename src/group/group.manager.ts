@@ -19,8 +19,7 @@ export class GroupManager {
    * Get multiple groups by array of group ids.
    * @param groupsIds - Array of group ids.
    */
-  public static async getManyGroups(groupsIds: string) {
-    // TODO: Update it with real API request
-    return [];
+  public static async getManyGroups(groupsIds: string[]) {
+    return (await HttpClient.post(`${GroupManager.groupsUrl}/group`, groupsIds));
   }
 }

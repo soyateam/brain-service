@@ -28,17 +28,6 @@ export class TaskController {
     throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
   }
 
-  public static async getTasksByParentAndType(req: Request, res: Response) {
-    const tasks =
-      (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}/type/${req.params.type}`)).tasks;
-
-    if (tasks) {
-      return res.status(200).send({ tasks });
-    }
-
-    throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
-  }
-
   /**
    * Gets specified statistics of a task.
    * @param req - Express Request
