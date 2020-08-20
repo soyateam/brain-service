@@ -1,5 +1,6 @@
 ###--- STAGE 1 - Development ---###
 FROM node:12-alpine as DEV
+ENV NODE_ENV=dev
 WORKDIR /usr/src/app
 COPY package*.json ./
 RUN npm install
