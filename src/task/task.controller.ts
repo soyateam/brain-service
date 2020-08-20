@@ -5,6 +5,7 @@ import { InvalidParameter, BadRequest } from '../utils/error';
 import { HttpClient } from '../utils/http.client';
 import config from '../config';
 import { IGroup } from './task.interface';
+import { SharedController } from '../shared/shared.controller';
 
 export class TaskController {
   private static readonly ERROR_MESSAGES = {
@@ -51,7 +52,7 @@ export class TaskController {
       throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
     } else {
       if (req.body.task.groups) {
-        req.body.task.groups = TaskController.toUniqueGroupArray(req.body.task.groups);
+        req.body.task.groups = SharedController.toUniqueGroupArray(req.body.task.groups);
       }
 
       const createdTask = await HttpClient.post(TaskController.tasksUrl,
@@ -142,16 +143,5 @@ export class TaskController {
     }
 
     throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
-  }
-
-  private static toUniqueGroupArray(arr: IGroup[]) {
-    if (arr.length < 2) {
-      return arr;
-    }
-
-    return (arr.filter(
-      (currGroup: IGroup, index: any, self: any) =>
-        self.findIndex((t: IGroup) => (t.id === currGroup.id) === index),
-    ));
   }
 }
