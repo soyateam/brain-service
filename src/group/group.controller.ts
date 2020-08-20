@@ -10,7 +10,7 @@ export class GroupController {
     INVALID_PARAMETER: 'Invalid parameter was given.',
   };
 
-  private static readonly groupUrl = `${config.groupServiceUrl}/group`;
+  private static readonly groupUrl = `${config.groupServiceUrl}/api/group`;
 
   /**
    * Gets groups by the groups parent id
@@ -20,7 +20,7 @@ export class GroupController {
    */
   public static async getGroupsByParent(req: Request, res: Response) {
     const groups =
-      (await HttpClient.get(`${GroupController.groupUrl}/parent/${req.params.id}`)).groups;
+      (await HttpClient.get(`${GroupController.groupUrl}/children/${req.params.id}`));
 
     if (groups) {
       return res.status(200).send(groups);
