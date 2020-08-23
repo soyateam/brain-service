@@ -54,10 +54,10 @@ export class SharedController {
           isFound = true;
           break;
         }
+      }
 
-        if (!isFound) {
-          throw new BadRequest(SharedController.ERROR_MESSAGES.UNEXISTING_GROUP);
-        }
+      if (!isFound) {
+        throw new BadRequest(SharedController.ERROR_MESSAGES.UNEXISTING_GROUP);
       }
     }
 
