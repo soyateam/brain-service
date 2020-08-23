@@ -20,6 +20,15 @@ export class GroupManager {
    * @param groupsIds - Array of group ids.
    */
   public static async getManyGroups(groupsIds: string[]) {
-    return (await HttpClient.post(`${GroupManager.groupsUrl}/group`, groupsIds));
+    return (await HttpClient.post(`${GroupManager.groupsUrl}/`, { ids: groupsIds }));
+  }
+
+  /**
+   * Get all units sums by unit names.
+   * @param unitNames - Array of unit names.
+   */
+  public static async getUnitsSums(unitNames: string[]) {
+    // TODO: Correct API request
+    return (await HttpClient.post(`${GroupManager.groupsUrl}/group/unit`, { units: unitNames }));
   }
 }

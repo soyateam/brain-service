@@ -23,4 +23,12 @@ export class TaskManager {
     return await HttpClient.get(`${TaskManager.tasksUrl}/${taskId}`);
   }
 
+  /**
+   * Get direct and indirect children of a given task.
+   * @param taskId - The id of the task.
+   */
+  public static async getTaskChildren(taskId: string) {
+    return await HttpClient.get(`${TaskManager.tasksUrl}/${taskId}/children`);
+  }
+
 }
