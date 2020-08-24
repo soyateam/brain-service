@@ -10,6 +10,8 @@ services:
       - ./logs:/usr/src/app/logs
     environment:
       - LOG_FILE_DIR=logs
+      - PORT= 3000
+      - AUTHENTICATION_REQUIRED=true
     depends_on:
       - mongo
     restart: always

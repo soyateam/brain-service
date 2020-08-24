@@ -3,7 +3,8 @@ FROM node:12-alpine as DEV
 ENV NODE_ENV=dev
 WORKDIR /usr/src/app
 COPY package*.json ./
-RUN npm install
+COPY tsconfig.json ./
+RUN npm install 
 
 ###--- STAGE 2 - Build ---###
 FROM node:12-alpine as BUILD
