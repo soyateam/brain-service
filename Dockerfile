@@ -22,4 +22,3 @@ COPY --from=BUILD /usr/src/app/package*.json ./
 COPY --from=BUILD /usr/src/app/dist ./dist
 RUN npm run install:prod
 ENTRYPOINT ["node", "/usr/src/app/dist/server.js"]
-EXPOSE 3000

@@ -3,7 +3,7 @@
 import { Router } from 'express';
 import { Wrapper } from '../utils/wrapper';
 import { GroupController } from './group.controller';
-import { GroupPermission } from './group.permission';
+import { PermissionHandler } from '../permissions/permission.handler';
 
 export class GroupRouter {
   public static router() {
@@ -11,14 +11,10 @@ export class GroupRouter {
 
     router.get(
       '/parent/:id',
-      Wrapper.wrapAsync(GroupPermission.getGroupsByParent),
+      Wrapper.wrapAsync(PermissionHandler.get),
       Wrapper.wrapAsync(GroupController.getGroupsByParent)
     );
-    router.get(
-      '/:id',
-      Wrapper.wrapAsync(GroupPermission.getGroupsByParent),
-      Wrapper.wrapAsync(GroupController.getGroupById)
-    );
+    router.get('/:id', Wrapper.wrapAsync(PermissionHandler.get), Wrapper.wrapAsync(GroupController.getGroupById));
 
     return router;
   }
