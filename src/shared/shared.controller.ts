@@ -14,7 +14,7 @@ export class SharedController {
     DUPLICATE_GROUP: 'Cannot assign duplicate groups',
   };
 
-  private static readonly groupUrl = `${config.groupServiceUrl}/api/group`;
+  public static readonly groupUrl = `${config.groupServiceUrl}/api/group`;
   private static readonly taskUrl = `${config.taskServiceUrl}/task`;
 
   /**
@@ -26,6 +26,8 @@ export class SharedController {
   public static async assignGroup(req: Request, res: Response) {
     if (!req.body.taskId ||
         !req.body.group ||
+        !req.body.group.id ||
+        !req.body.group.name ||
         !('isCountGrow' in req.body) ||
         typeof(req.body.isCountGrow) !== 'boolean') {
       throw new InvalidParameter(SharedController.ERROR_MESSAGES.INVALID_PARAMETER);
@@ -38,10 +40,7 @@ export class SharedController {
       throw new BadRequest(SharedController.ERROR_MESSAGES.NO_PARENT);
     }
 
-    if (req.body.isCountGrow) {
-      // Add the group to the groups array of the task.
-      oldTask.groups.push(req.body.group);
-    } else {
+    if (!req.body.isCountGrow) {
       if (oldTask.groups && oldTask.groups.length === 0) {
         throw new BadRequest(SharedController.ERROR_MESSAGES.UNEXISTING_GROUP);
       }
@@ -61,24 +60,27 @@ export class SharedController {
       }
     }
 
-    // Remove any duplicates if exist.
-    const newGroups = SharedController.toUniqueGroupArray(oldTask.groups);
-    if (JSON.stringify(newGroups) !== JSON.stringify(oldTask.groups)) {
-      throw new BadRequest(SharedController.ERROR_MESSAGES.DUPLICATE_GROUP);
-    }
+    const group = await HttpClient.put(`${SharedController.groupUrl}/${req.body.group.id}`,
+                                       { isCountGrow: req.body.isCountGrow });
 
-    const task = await HttpClient.put(SharedController.taskUrl, { task: oldTask });
-
-    if (task) {
-      const group = await HttpClient.put(`${SharedController.groupUrl}/${req.body.group.id}`,
-                                         { isCountGrow: req.body.isCountGrow });
-
-      if (group) {
-        return res.status(200).send(task);
+    if (group) {
+      if (req.body.isCountGrow) {
+        oldTask.groups.push({ name: group.name, id: group.kartoffelID });
       }
 
-      throw new InvalidParameter(SharedController.ERROR_MESSAGES.INVALID_PARAMETER);
+      // Remove any duplicates if exist.
+      const newGroups = SharedController.toUniqueGroupArray(oldTask.groups);
+      if (JSON.stringify(newGroups) !== JSON.stringify(oldTask.groups)) {
+        throw new BadRequest(SharedController.ERROR_MESSAGES.DUPLICATE_GROUP);
+      }
+      const task = await HttpClient.put(SharedController.taskUrl, { task: oldTask });
+
+      if (task) {
+        return res.status(200).send(task);
+      }
     }
+
+    throw new InvalidParameter(SharedController.ERROR_MESSAGES.INVALID_PARAMETER);
   }
 
   /**

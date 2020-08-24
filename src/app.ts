@@ -11,16 +11,6 @@ import { TaskRouter } from './task/task.routes';
 import { GroupRouter } from './group/group.routes';
 import { SharedRouter } from './shared/shared.routes';
 
-// import * as express from "express";
-// import * as cors from "cors";
-// import * as bodyParser from "body-parser";
-// import * as cookieParser from "cookie-parser";
-// import * as morgan from "morgan";
-// import * as helmet from "helmet";
-// import { errorHandler } from "./utils/error.handler";
-// import { TaskRouter } from "./task/task.routes";
-// import { GroupRouter } from "./group/group.routes";
-
 // App initialization
 const app = express();
 
