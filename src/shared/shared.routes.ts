@@ -9,7 +9,7 @@ export class SharedRouter {
     const router: Router = Router();
 
     router.put('/assign', Wrapper.wrapAsync(SharedController.assignGroup));
-    // router.get('/', Wrapper.wrapAsync(SharedController.getOrganization));
+    router.get('/stats', Wrapper.wrapAsync(SharedController.getStatistics));
 
     return router;
   }
