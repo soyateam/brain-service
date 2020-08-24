@@ -40,9 +40,7 @@ export class SharedController {
       throw new BadRequest(SharedController.ERROR_MESSAGES.NO_PARENT);
     }
 
-    if (req.body.isCountGrow) {
-      // Remove this.
-    } else {
+    if (!req.body.isCountGrow) {
       if (oldTask.groups && oldTask.groups.length === 0) {
         throw new BadRequest(SharedController.ERROR_MESSAGES.UNEXISTING_GROUP);
       }
