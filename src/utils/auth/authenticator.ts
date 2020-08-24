@@ -1,12 +1,12 @@
-import passport from "passport";
-import passportJwt from "passport-jwt";
-import config from "../../config";
-import { Request, Response, NextFunction } from "express";
+import passport from 'passport';
+import passportJwt from 'passport-jwt';
+import config from '../../config';
+import { Request, Response, NextFunction } from 'express';
 
 export class Authenticator {
   private static readonly jwtOptions: passportJwt.StrategyOptions = {
     jwtFromRequest: passportJwt.ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: config.authentication.key,
+    secretOrKey: config.authentication.secret,
   };
 
   public static initialize(verifyCallback?: passportJwt.VerifiedCallback) {
@@ -27,7 +27,7 @@ export class Authenticator {
   }
 
   public static middleware(req: Request, res: Response, next: NextFunction) {
-    if (req.path === "/health") return next();
-    return passport.authenticate("jwt", { session: false })(req, res, next);
+    if (req.path === '/health') return next();
+    return passport.authenticate('jwt', { session: false })(req, res, next);
   }
 }

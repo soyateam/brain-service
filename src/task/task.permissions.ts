@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { PermissionHandler } from "../permissions/permission.handler";
+import { Request, Response, NextFunction } from 'express';
+import { PermissionHandler } from '../permissions/permission.handler';
 
 export class TaskPermission {
   static async getTasksByParentId(req: Request, res: Response, next: NextFunction) {

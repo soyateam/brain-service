@@ -1,7 +1,7 @@
-import config from "../../config";
-import { Types } from "mongoose";
-import { sign } from "jsonwebtoken";
-import { ROLE } from "../../permissions/user.interface";
+import config from '../../config';
+import { Types } from 'mongoose';
+import { sign } from 'jsonwebtoken';
+import { ROLE } from '../../permissions/user.interface';
 
 export function ValidTokenMock() {
   const user = {
@@ -10,5 +10,5 @@ export function ValidTokenMock() {
     role: ROLE.READ,
   };
 
-  return `Bearer ${sign(user, config.authentication.key)}`;
+  return `Bearer ${sign(user, config.authentication.secret)}`;
 }

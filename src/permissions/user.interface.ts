@@ -5,6 +5,6 @@ export interface IUser {
 }
 
 export enum ROLE {
-  READ = "READ",
-  WRITE = "WRITE",
+  READ = 'READ',
+  WRITE = 'WRITE',
 }
