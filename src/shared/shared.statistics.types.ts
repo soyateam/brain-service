@@ -13,6 +13,8 @@ export const fromFieldToDisplayName = {
   peopleSum: 'כמות אנשים',
   kevaSum: 'קבע',
   hovaSum: 'חובה',
+  miluimSum: 'מילואים',
+  civilianSum: 'אזרח',
   aSum: 'א',
   bSum: 'ב',
   cSum: 'ג',

@@ -33,10 +33,8 @@ export class StatisticsUtils {
     // Get all associated groups to the task.
     // For each group id in the groups array add it to the associated groups object
     // with it's associated counts
-    for (const taskGroups of fullTask.groups) {
-      for (const currentGroup of taskGroups) {
-        associatedGroups[currentGroup.id] = { groupInstanceCount: 1, groupDetails: null };
-      }
+    for (const currentGroup of fullTask.groups) {
+      associatedGroups[currentGroup.id] = { groupInstanceCount: 1, groupDetails: null };
     }
 
     // Get all direct and indirect children of the task
@@ -44,23 +42,23 @@ export class StatisticsUtils {
 
     // For each group, add it to the associated group object
     for (const childTask of childrenTasks) {
-      for (const childGroups of childTask.groups) {
-        for (const currentGroup of childGroups) {
-          if (associatedGroups[currentGroup.id]) {
-            associatedGroups[currentGroup.id].groupInstanceCount += 1;
-          } else {
-            associatedGroups[currentGroup.id] = { groupInstanceCount: 1, groupDetails: null };
-          }
+      for (const currentGroup of childTask.groups) {
+        if (associatedGroups[currentGroup.id]) {
+          associatedGroups[currentGroup.id].groupInstanceCount += 1;
+        } else {
+          associatedGroups[currentGroup.id] = { groupInstanceCount: 1, groupDetails: null };
         }
       }
     }
 
     // Populate all groups details from group service
-    const populatedGroups = await GroupManager.getManyGroups(Object.keys(associatedGroups));
+    const populatedGroups = (
+      await GroupManager.getManyGroups(Object.keys(associatedGroups))
+    ).groups;
 
     // Assign each group it's details
     for (const populatedGroup of populatedGroups) {
-      associatedGroups[populatedGroup.kartoffelID].groupDetails = populatedGroups;
+      associatedGroups[populatedGroup.kartoffelID].groupDetails = populatedGroup;
     }
 
     return associatedGroups;
@@ -102,16 +100,16 @@ export class StatisticsUtils {
 
       } else {
         unitAssociatedGroups[associatedGroups[currentGroupId].groupDetails.unitName] =
-          { unitDetails: null, associatedGroups: [] };
+          { unitDetails: null, associatedGroups: [associatedGroups[currentGroupId].groupDetails] };
       }
     }
 
     // Request unit sums from group service
-    const unitSums = await GroupManager.getUnitsSums([...unitNames]);
+    const unitSums = (await GroupManager.getUnitsSums([...unitNames])).units;
 
     // Attach each unit sum it corresponding details
     for (const currUnitSum of unitSums) {
-      unitAssociatedGroups[currUnitSum.unitName].unitDetails = currUnitSum;
+      unitAssociatedGroups[currUnitSum._id].unitDetails = currUnitSum;
     }
 
     return unitAssociatedGroups;
@@ -173,6 +171,16 @@ export class StatisticsUtils {
           data: [],
         });
 
+        statisticsObj.series.push({
+          name: fromFieldToDisplayName['miluimSum'],
+          data: [],
+        });
+
+        statisticsObj.series.push({
+          name: fromFieldToDisplayName['civilianSum'],
+          data: [],
+        });
+
         // For each group, add it to the categories and set it corresponding sum to the series
         for (const groupId of associatedGroupsIds) {
 
@@ -189,9 +197,23 @@ export class StatisticsUtils {
             associatedGroups[groupId].groupDetails.assignedCount
           );
 
+          const relativeMiluimSum = (
+            associatedGroups[groupId].groupDetails.serviceType.miluimSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeCivilianSum = (
+            associatedGroups[groupId].groupDetails.serviceType.civilianSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
           statisticsObj.categories.push(associatedGroups[groupId].groupDetails.name);
           statisticsObj.series[0].data.push(relativeHovaSum);
           statisticsObj.series[1].data.push(relativeKevaSum);
+          statisticsObj.series[2].data.push(relativeMiluimSum);
+          statisticsObj.series[3].data.push(relativeCivilianSum);
         }
         break;
 
@@ -213,6 +235,21 @@ export class StatisticsUtils {
           data: [],
         });
 
+        statisticsObj.series.push({
+          name: fromFieldToDisplayName['hovaSum'],
+          data: [],
+        });
+
+        statisticsObj.series.push({
+          name: fromFieldToDisplayName['miluimSum'],
+          data: [],
+        });
+
+        statisticsObj.series.push({
+          name: fromFieldToDisplayName['civilianSum'],
+          data: [],
+        });
+
         // For each group, add it to the categories and set it corresponding sum to the series
         for (const groupId of associatedGroupsIds) {
 
@@ -224,13 +261,31 @@ export class StatisticsUtils {
           );
 
           const relativeBSum = (
-            associatedGroups[groupId].groupDetails.serviceType.bSum *
+            associatedGroups[groupId].groupDetails.rankType.bSum *
             associatedGroups[groupId].groupInstanceCount /
             associatedGroups[groupId].groupDetails.assignedCount
           );
 
           const relativeCSum = (
-            associatedGroups[groupId].groupDetails.serviceType.cSum *
+            associatedGroups[groupId].groupDetails.rankType.cSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeHovaSum = (
+            associatedGroups[groupId].groupDetails.rankType.hovaSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeMiluimSum = (
+            associatedGroups[groupId].groupDetails.rankType.miluimSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeCivilianSum = (
+            associatedGroups[groupId].groupDetails.rankType.civilianSum *
             associatedGroups[groupId].groupInstanceCount /
             associatedGroups[groupId].groupDetails.assignedCount
           );
@@ -239,6 +294,9 @@ export class StatisticsUtils {
           statisticsObj.series[0].data.push(relativeASum);
           statisticsObj.series[1].data.push(relativeBSum);
           statisticsObj.series[2].data.push(relativeCSum);
+          statisticsObj.series[3].data.push(relativeHovaSum);
+          statisticsObj.series[4].data.push(relativeMiluimSum);
+          statisticsObj.series[5].data.push(relativeCivilianSum);
         }
         break;
 
@@ -302,7 +360,7 @@ export class StatisticsUtils {
           const unitDataObj = {
             name: unitName,
             y: 0,
-            fullSize: unitObj.peopleSum,
+            fullSize: unitObj[unitName].unitDetails.peopleSum,
             drilldown: unitName,
           };
           const unitAssociatedGroups = unitObj[unitName].associatedGroups;
@@ -332,33 +390,45 @@ export class StatisticsUtils {
 
         // For each unit name create unit data object for main series and drilldown object
         for (const unitName of unitNames) {
+
           const unitDataObj = {
             name: unitName,
             y: 0,
-            fullSize: unitObj.peopleSum,
+            fullSize: unitObj[unitName].unitDetails.peopleSum,
             drilldown: unitName,
           };
+
           const unitAssociatedGroups = unitObj[unitName].associatedGroups;
           const unitDrilldownObj: any = { name: unitName, id: unitDataObj.drilldown, data: [] };
           const drilldownDataTypes = [
             { name: fromFieldToDisplayName['hovaSum'], y: 0 },
             { name: fromFieldToDisplayName['kevaSum'], y: 0 },
+            { name: fromFieldToDisplayName['miluimSum'], y: 0 },
+            { name: fromFieldToDisplayName['civilianSum'], y: 0 },
           ];
 
           let unitYValue = 0;
           let hovaSumYValue = 0;
           let kevaSumYValue = 0;
+          let miluimSumYValue = 0;
+          let civilianSumYValue = 0;
 
           // Add drilldown data for each unit as the groups associated to the unit
           for (const groupObj of unitAssociatedGroups) {
-            unitYValue += groupObj.serviceType.hovaSum + groupObj.serviceType.kevaSum;
+            unitYValue +=
+              groupObj.serviceType.hovaSum + groupObj.serviceType.kevaSum +
+              groupObj.serviceType.miluimSum + groupObj.serviceType.civilianSum;
             hovaSumYValue += groupObj.serviceType.hovaSum;
             kevaSumYValue += groupObj.serviceType.kevaSum;
+            miluimSumYValue += groupObj.serviceType.miluimSum;
+            civilianSumYValue += groupObj.serviceType.civilianSum;
           }
 
           // Setting the service type sums
           drilldownDataTypes[0].y = hovaSumYValue;
           drilldownDataTypes[1].y = kevaSumYValue;
+          drilldownDataTypes[2].y = miluimSumYValue;
+          drilldownDataTypes[3].y = civilianSumYValue;
 
           // Setting the data of the drilldown to the service type sums
           unitDrilldownObj.data = drilldownDataTypes;
@@ -380,7 +450,7 @@ export class StatisticsUtils {
           const unitDataObj = {
             name: unitName,
             y: 0,
-            fullSize: unitObj.peopleSum,
+            fullSize: unitObj[unitName].unitDetails.peopleSum,
             drilldown: unitName,
           };
           const unitAssociatedGroups = unitObj[unitName].associatedGroups;
@@ -389,25 +459,40 @@ export class StatisticsUtils {
             { name: fromFieldToDisplayName['aSum'], y: 0 },
             { name: fromFieldToDisplayName['bSum'], y: 0 },
             { name: fromFieldToDisplayName['cSum'], y: 0 },
+            { name: fromFieldToDisplayName['hovaSum'], y: 0 },
+            { name: fromFieldToDisplayName['miluimSum'], y: 0 },
+            { name: fromFieldToDisplayName['civilianSum'], y: 0 },
           ];
 
           let unitYValue = 0;
           let aSumYValue = 0;
           let bSumYValue = 0;
           let cSumYValue = 0;
+          let hovaSumYValue = 0;
+          let miluimSumYValue = 0;
+          let civilianSumYValue = 0;
 
           // Add drilldown data for each unit as the groups associated to the unit
           for (const groupObj of unitAssociatedGroups) {
-            unitYValue += groupObj.rankType.aSum + groupObj.rankType.bSum + groupObj.rankType.cSum;
+            unitYValue +=
+              groupObj.rankType.aSum + groupObj.rankType.bSum + groupObj.rankType.cSum +
+              groupObj.rankType.hovaSum + groupObj.rankType.miluimSum +
+              groupObj.rankType.civilianSum;
             aSumYValue += groupObj.rankType.aSum;
             bSumYValue += groupObj.rankType.bSum;
             cSumYValue += groupObj.rankType.cSum;
+            hovaSumYValue += groupObj.rankType.hovaSum;
+            miluimSumYValue += groupObj.rankType.miluimSum;
+            civilianSumYValue += groupObj.rankType.civilianSum;
           }
 
           // Setting the rank type sums
           drilldownDataTypes[0].y = aSumYValue;
           drilldownDataTypes[1].y = bSumYValue;
           drilldownDataTypes[2].y = cSumYValue;
+          drilldownDataTypes[3].y = hovaSumYValue;
+          drilldownDataTypes[4].y = miluimSumYValue;
+          drilldownDataTypes[5].y = civilianSumYValue;
 
           // Setting the data of the drilldown to the rank type sums
           unitDrilldownObj.data = drilldownDataTypes;
@@ -420,6 +505,10 @@ export class StatisticsUtils {
           statisticsObj.drilldownSeries.push(unitDrilldownObj);
         }
         break;
+
+      // Code will never reach here, if so, throw exception to indicate misuse
+      default:
+        throw new Error('Misuse of calculateStatistics method - it should get only regular statistics types');
     }
 
     return statisticsObj;

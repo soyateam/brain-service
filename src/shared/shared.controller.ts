@@ -100,7 +100,7 @@ export class SharedController {
       if (Object.values(StatisticsTypes).indexOf(statisticsType) !== -1) {
 
         // Calculate the statistic and return it
-        const result = StatisticsController.calculateStatisticsSum(statisticsType, taskId);
+        const result = await StatisticsController.calculateStatisticsSum(statisticsType, taskId);
         return res.status(200).send(result);
       }
 

@@ -25,10 +25,10 @@ export class GroupManager {
 
   /**
    * Get all units sums by unit names.
-   * @param unitNames - Array of unit names.
+   * @param unitsNames - Array of unit names.
    */
-  public static async getUnitsSums(unitNames: string[]) {
+  public static async getUnitsSums(unitsNames: string[]) {
     // TODO: Correct API request
-    return (await HttpClient.post(`${GroupManager.groupsUrl}/group/unit`, { units: unitNames }));
+    return (await HttpClient.post(`${GroupManager.groupsUrl}/unit`, { unitsNames }));
   }
 }
