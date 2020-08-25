@@ -29,7 +29,7 @@ export class GroupController {
     throw new NotFound(GroupController.ERROR_MESSAGES.INVALID_PARAMETER);
   }
 
-    /**
+  /**
    * Gets a specific group's children by the organization id
    * from group-service.
    * @param req - Express Request

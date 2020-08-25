@@ -3,12 +3,17 @@
 import { Router } from 'express';
 import { Wrapper } from '../utils/wrapper';
 import { SharedController } from './shared.controller';
+import { PermissionHandler } from '../permissions/permission.handler';
 
 export class SharedRouter {
   public static router() {
     const router: Router = Router();
 
-    router.put('/assign', Wrapper.wrapAsync(SharedController.assignGroup));
+    router.put(
+      '/assign',
+      Wrapper.wrapAsync(PermissionHandler.createOrUpdate),
+      Wrapper.wrapAsync(SharedController.assignGroup),
+    );
 
     return router;
   }

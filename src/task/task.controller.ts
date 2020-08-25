@@ -4,7 +4,6 @@ import { Request, Response } from 'express';
 import { InvalidParameter, BadRequest, InternalServerError, NotFound } from '../utils/error';
 import { HttpClient } from '../utils/http.client';
 import config from '../config';
-import { IGroup } from './task.interface';
 import { SharedController } from '../shared/shared.controller';
 
 export class TaskController {
@@ -21,8 +20,8 @@ export class TaskController {
    * @param res - Express Response
    */
   public static async getTasksByParentId(req: Request, res: Response) {
-    const tasks =
-      (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}`)).tasks;
+    const tasks = (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}`))
+      .tasks;
 
     if (tasks) {
       return res.status(200).send({ tasks });
@@ -32,8 +31,11 @@ export class TaskController {
   }
 
   public static async getTasksByParentAndType(req: Request, res: Response) {
-    const tasks =
-      (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}/type/${req.params.type}`)).tasks;
+    const tasks = (
+      await HttpClient.get(
+        `${TaskController.tasksUrl}/parent/${req.params.parentId}/type/${req.params.type}`,
+      )
+    ).tasks;
 
     if (tasks) {
       return res.status(200).send({ tasks });
@@ -55,8 +57,7 @@ export class TaskController {
         req.body.task.groups = SharedController.toUniqueGroupArray(req.body.task.groups);
       }
 
-      const createdTask = await HttpClient.post(TaskController.tasksUrl,
-                                                { task: req.body.task });
+      const createdTask = await HttpClient.post(TaskController.tasksUrl, { task: req.body.task });
 
       if (createdTask) {
         return res.status(200).send(createdTask);
@@ -72,7 +73,7 @@ export class TaskController {
    * @param res - Express Response
    */
   public static async deleteTask(req: Request, res: Response) {
-    // Get the children of a task to know if it has any.
+    // Get the task from task-service.
     const task = await HttpClient.get(`${TaskController.tasksUrl}/${req.params.id}`);
     let removedSuccessfully = 0;
 
@@ -81,6 +82,7 @@ export class TaskController {
       // If it has children, then its not possible to remove the task.
       if (task.subTasksCount > 0) {
         throw new BadRequest(TaskController.ERROR_MESSAGES.BAD_REQUEST);
+
       } else { // If it doesn't have any children, then remove the task.
         if (task.groups && task.groups.length > 0) {
           let removedGroup;

@@ -2,6 +2,7 @@
 
 import express from 'express';
 import cors from 'cors';
+import config from './config';
 import * as bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import morgan from 'morgan';
@@ -10,12 +11,21 @@ import { errorHandler } from './utils/error.handler';
 import { TaskRouter } from './task/task.routes';
 import { GroupRouter } from './group/group.routes';
 import { SharedRouter } from './shared/shared.routes';
+import { Authenticator } from './utils/auth/authenticator';
+import { validTokenMock } from './utils/auth/user.mock';
 
 // App initialization
 const app = express();
 
 const options: cors.CorsOptions = {
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'X-Access-Token', 'authorization'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'X-Access-Token',
+    'authorization',
+  ],
   credentials: true,
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
   origin: '*',
@@ -23,6 +33,11 @@ const options: cors.CorsOptions = {
 };
 
 app.use(cors(options));
+
+const addMockToken = (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  req.headers.authorization = validTokenMock();
+  return next();
+};
 
 // Morgan formatting types for each environment
 const morganFormatting: any = { prod: 'common', dev: 'dev', test: 'tiny' };
@@ -34,6 +49,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(morgan(morganFormatting[process.env.NODE_ENV || 'dev']));
 app.use(helmet());
+
+if (!config.authentication.required) app.use(addMockToken);
+
+app.use(Authenticator.initialize());
+app.use(Authenticator.middleware);
 
 /* Routes */
 
