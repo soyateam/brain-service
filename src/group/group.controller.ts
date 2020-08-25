@@ -19,7 +19,8 @@ export class GroupController {
    * @param res - Express Response
    */
   public static async getGroupsByParent(req: Request, res: Response) {
-    const groups = await HttpClient.get(`${GroupController.groupUrl}/children/${req.params.id}`);
+    const groups =
+      (await HttpClient.get(`${GroupController.groupUrl}/children/${req.params.id || ''}`));
 
     if (groups) {
       return res.status(200).send(groups);
