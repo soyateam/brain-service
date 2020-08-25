@@ -12,13 +12,20 @@ import { TaskRouter } from './task/task.routes';
 import { GroupRouter } from './group/group.routes';
 import { SharedRouter } from './shared/shared.routes';
 import { Authenticator } from './utils/auth/authenticator';
-import { ValidTokenMock } from './utils/auth/user.mock';
+import { validTokenMock } from './utils/auth/user.mock';
 
 // App initialization
 const app = express();
 
 const options: cors.CorsOptions = {
-  allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'X-Access-Token', 'authorization'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Content-Type',
+    'Accept',
+    'X-Access-Token',
+    'authorization',
+  ],
   credentials: true,
   methods: 'GET,HEAD,OPTIONS,PUT,PATCH,POST,DELETE',
   origin: '*',
@@ -28,7 +35,7 @@ const options: cors.CorsOptions = {
 app.use(cors(options));
 
 const addMockToken = (req: express.Request, res: express.Response, next: express.NextFunction) => {
-  req.headers.authorization = ValidTokenMock();
+  req.headers.authorization = validTokenMock();
   return next();
 };
 

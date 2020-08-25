@@ -18,7 +18,7 @@ export class PermissionHandler {
     if (!req.user) throw new Unauthorized();
     const user = req.user as IUser;
 
-    if (user.role == ROLE.WRITE) return next();
+    if (user.role === ROLE.WRITE) return next();
 
     next(new Unauthorized('User is not authorized to perform this action'));
   }

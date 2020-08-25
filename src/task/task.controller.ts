@@ -20,7 +20,8 @@ export class TaskController {
    * @param res - Express Response
    */
   public static async getTasksByParentId(req: Request, res: Response) {
-    const tasks = (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}`)).tasks;
+    const tasks = (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}`))
+      .tasks;
 
     if (tasks) {
       return res.status(200).send({ tasks });
@@ -31,7 +32,9 @@ export class TaskController {
 
   public static async getTasksByParentAndType(req: Request, res: Response) {
     const tasks = (
-      await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}/type/${req.params.type}`)
+      await HttpClient.get(
+        `${TaskController.tasksUrl}/parent/${req.params.parentId}/type/${req.params.type}`
+      )
     ).tasks;
 
     if (tasks) {
@@ -71,7 +74,9 @@ export class TaskController {
    */
   public static async deleteTask(req: Request, res: Response) {
     // Get the children of a task to know if it has any.
-    const childTasks = (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.id || 'null'}`)).tasks;
+    const childTasks = (
+      await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.id || 'null'}`)
+    ).tasks;
 
     // Checks if there are any children to this task
     if (childTasks) {

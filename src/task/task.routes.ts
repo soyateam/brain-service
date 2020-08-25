@@ -18,9 +18,21 @@ export class TaskRouter {
       Wrapper.wrapAsync(PermissionHandler.get),
       Wrapper.wrapAsync(TaskController.getTasksByParentId)
     );
-    router.get('/:id', Wrapper.wrapAsync(PermissionHandler.get), Wrapper.wrapAsync(TaskController.getTaskById));
-    router.post('/', Wrapper.wrapAsync(PermissionHandler.createOrUpdate), Wrapper.wrapAsync(TaskController.createTask));
-    router.put('/', Wrapper.wrapAsync(PermissionHandler.createOrUpdate), Wrapper.wrapAsync(TaskController.updateTask));
+    router.get(
+      '/:id',
+      Wrapper.wrapAsync(PermissionHandler.get),
+      Wrapper.wrapAsync(TaskController.getTaskById)
+    );
+    router.post(
+      '/',
+      Wrapper.wrapAsync(PermissionHandler.createOrUpdate),
+      Wrapper.wrapAsync(TaskController.createTask)
+    );
+    router.put(
+      '/',
+      Wrapper.wrapAsync(PermissionHandler.createOrUpdate),
+      Wrapper.wrapAsync(TaskController.updateTask)
+    );
     router.delete(
       '/:id',
       Wrapper.wrapAsync(PermissionHandler.createOrUpdate),

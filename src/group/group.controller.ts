@@ -19,8 +19,7 @@ export class GroupController {
    * @param res - Express Response
    */
   public static async getGroupsByParent(req: Request, res: Response) {
-    const groups =
-      (await HttpClient.get(`${GroupController.groupUrl}/children/${req.params.id}`));
+    const groups = await HttpClient.get(`${GroupController.groupUrl}/children/${req.params.id}`);
 
     if (groups) {
       return res.status(200).send(groups);
@@ -29,7 +28,7 @@ export class GroupController {
     throw new NotFound(GroupController.ERROR_MESSAGES.INVALID_PARAMETER);
   }
 
-    /**
+  /**
    * Gets a specific group's children by the organization id
    * from group-service.
    * @param req - Express Request

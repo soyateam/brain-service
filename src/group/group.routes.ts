@@ -14,7 +14,11 @@ export class GroupRouter {
       Wrapper.wrapAsync(PermissionHandler.get),
       Wrapper.wrapAsync(GroupController.getGroupsByParent)
     );
-    router.get('/:id', Wrapper.wrapAsync(PermissionHandler.get), Wrapper.wrapAsync(GroupController.getGroupById));
+    router.get(
+      '/:id',
+      Wrapper.wrapAsync(PermissionHandler.get),
+      Wrapper.wrapAsync(GroupController.getGroupById)
+    );
 
     return router;
   }
