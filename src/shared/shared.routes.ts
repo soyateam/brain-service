@@ -14,6 +14,11 @@ export class SharedRouter {
       Wrapper.wrapAsync(PermissionHandler.createOrUpdate),
       Wrapper.wrapAsync(SharedController.assignGroup),
     );
+    router.get(
+      '/stats',
+      Wrapper.wrapAsync(PermissionHandler.get),
+      Wrapper.wrapAsync(SharedController.getStatistics),
+    );
 
     return router;
   }

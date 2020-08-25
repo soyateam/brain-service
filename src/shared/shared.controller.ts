@@ -5,10 +5,13 @@ import { HttpClient } from '../utils/http.client';
 import config from '../config';
 import { InvalidParameter, BadRequest } from '../utils/error';
 import { IGroup } from '../task/task.interface';
+import { StatisticsTypes } from './shared.statistics.types';
+import { StatisticsController } from './shared.statistics.controller';
 
 export class SharedController {
   private static readonly ERROR_MESSAGES = {
     INVALID_PARAMETER: 'Invalid paramters were given.',
+    INVALID_STAT_TYPE: 'Invalid statistics type was given.',
     NO_PARENT: 'Cannot assign to a task without a parent.',
     UNEXISTING_GROUP: 'Cannot find an unexisting group.',
     DUPLICATE_GROUP: 'Cannot assign duplicate groups',
@@ -78,6 +81,32 @@ export class SharedController {
       if (task) {
         return res.status(200).send(task);
       }
+    }
+
+    throw new InvalidParameter(SharedController.ERROR_MESSAGES.INVALID_PARAMETER);
+  }
+
+  /**
+   * Get statistics calculation by given task and statistics types
+   * @param req - Express Request
+   * @param res - Express Response
+   */
+  public static async getStatistics(req: Request, res: Response) {
+    const taskId = req.query.taskId as string;
+    const statisticsType = req.query.stats as StatisticsTypes;
+
+    // If taskId and statisticsType are given
+    if (taskId && statisticsType) {
+
+      // Check if the statistic type given is in legal statisitics types
+      if (Object.values(StatisticsTypes).indexOf(statisticsType) !== -1) {
+
+        // Calculate the statistic and return it
+        const result = await StatisticsController.calculateStatisticsSum(statisticsType, taskId);
+        return res.status(200).send(result);
+      }
+
+      throw new InvalidParameter(SharedController.ERROR_MESSAGES.INVALID_STAT_TYPE);
     }
 
     throw new InvalidParameter(SharedController.ERROR_MESSAGES.INVALID_PARAMETER);
