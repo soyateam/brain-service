@@ -91,6 +91,15 @@ export class TaskController {
           }
 
           throw new InternalServerError('Error in the removal of groups.');
+        } else {
+          const removedTask =
+             await HttpClient.delete(`${TaskController.tasksUrl}/${req.params.id}`);
+
+          if (removedTask) {
+            return res.status(200).send(removedTask);
+          }
+
+          throw new InternalServerError('Error in the removal of task.');
         }
       }
     }
