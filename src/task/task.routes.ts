@@ -11,32 +11,32 @@ export class TaskRouter {
     router.get(
       '/type/:type',
       Wrapper.wrapAsync(PermissionHandler.get),
-      Wrapper.wrapAsync(TaskController.getTasksByType)
+      Wrapper.wrapAsync(TaskController.getTasksByType),
     );
     router.get(
-      '/parent/:parentId',
+      '/parent/:parentId?',
       Wrapper.wrapAsync(PermissionHandler.get),
-      Wrapper.wrapAsync(TaskController.getTasksByParentId)
+      Wrapper.wrapAsync(TaskController.getTasksByParentId),
     );
     router.get(
       '/:id',
       Wrapper.wrapAsync(PermissionHandler.get),
-      Wrapper.wrapAsync(TaskController.getTaskById)
+      Wrapper.wrapAsync(TaskController.getTaskById),
     );
     router.post(
       '/',
       Wrapper.wrapAsync(PermissionHandler.createOrUpdate),
-      Wrapper.wrapAsync(TaskController.createTask)
+      Wrapper.wrapAsync(TaskController.createTask),
     );
     router.put(
       '/',
       Wrapper.wrapAsync(PermissionHandler.createOrUpdate),
-      Wrapper.wrapAsync(TaskController.updateTask)
+      Wrapper.wrapAsync(TaskController.updateTask),
     );
     router.delete(
       '/:id',
       Wrapper.wrapAsync(PermissionHandler.createOrUpdate),
-      Wrapper.wrapAsync(TaskController.deleteTask)
+      Wrapper.wrapAsync(TaskController.deleteTask),
     );
 
     return router;

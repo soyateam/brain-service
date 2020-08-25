@@ -33,7 +33,7 @@ export class TaskController {
   public static async getTasksByParentAndType(req: Request, res: Response) {
     const tasks = (
       await HttpClient.get(
-        `${TaskController.tasksUrl}/parent/${req.params.parentId}/type/${req.params.type}`
+        `${TaskController.tasksUrl}/parent/${req.params.parentId}/type/${req.params.type}`,
       )
     ).tasks;
 
@@ -76,7 +76,6 @@ export class TaskController {
     // Get the task from task-service.
     const task = await HttpClient.get(`${TaskController.tasksUrl}/${req.params.id}`);
     let removedSuccessfully = 0;
-
 
     // If the task was found.
     if (task) {

@@ -10,7 +10,7 @@ export class GroupRouter {
     const router: Router = Router();
     
     router.get(
-      '/parent/:id',
+      '/parent/:id?',
       Wrapper.wrapAsync(PermissionHandler.get),
       Wrapper.wrapAsync(GroupController.getGroupsByParent)
     );
