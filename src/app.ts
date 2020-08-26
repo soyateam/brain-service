@@ -60,9 +60,9 @@ app.use(Authenticator.middleware);
 // Health check for Load Balancer
 app.get('/health', (req, res) => res.send('alive'));
 
-app.use('/task', TaskRouter.router());
-app.use('/group', GroupRouter.router());
-app.use('/shared', SharedRouter.router());
+app.use('/api/task', TaskRouter.router());
+app.use('/api/group', GroupRouter.router());
+app.use('/api/shared', SharedRouter.router());
 
 // Error handler
 app.use(errorHandler);

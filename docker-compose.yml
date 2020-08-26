@@ -1,10 +1,10 @@
-version: "3.5"
+version: '3.5'
 services:
   brain-service:
     container_name: brain-service
     image: brain-service:latest
     ports:
-      - "3000:3000" # Change it if you want
+      - '3000:3000' # Change it if you want
     build: .
     volumes:
       - ./logs:/usr/src/app/logs
@@ -17,3 +17,5 @@ services:
     restart: always
   mongo:
     image: mongo:latest
+    ports:
+      - '27017:27017'
