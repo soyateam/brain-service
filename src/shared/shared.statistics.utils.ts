@@ -96,11 +96,11 @@ export class StatisticsUtils {
       // Add related group to the related unit
       if (unitAssociatedGroups[associatedGroups[currentGroupId].groupDetails.unitName]) {
         unitAssociatedGroups[associatedGroups[currentGroupId].groupDetails.unitName]
-        .associatedGroups.push(associatedGroups[currentGroupId].groupDetails);
+        .associatedGroups.push(associatedGroups[currentGroupId]);
 
       } else {
         unitAssociatedGroups[associatedGroups[currentGroupId].groupDetails.unitName] =
-          { unitDetails: null, associatedGroups: [associatedGroups[currentGroupId].groupDetails] };
+          { unitDetails: null, associatedGroups: [associatedGroups[currentGroupId]] };
       }
     }
 
@@ -369,10 +369,16 @@ export class StatisticsUtils {
 
           // Add drilldown data for each unit as the groups associated to the unit
           for (const groupObj of unitAssociatedGroups) {
-            unitYValue += groupObj.peopleSum;
+            const relativePeopleSum =
+              groupObj.groupDetails.peopleSum *
+              groupObj.groupInstanceCount /
+              groupObj.groupDetails.assignedCount;
+
+            unitYValue += relativePeopleSum;
+
             unitDrilldownObj.data.push({
-              name: groupObj.name,
-              y: groupObj.peopleSum,
+              name: groupObj.groupDetails.name,
+              y: relativePeopleSum,
             });
           }
 
@@ -415,13 +421,31 @@ export class StatisticsUtils {
 
           // Add drilldown data for each unit as the groups associated to the unit
           for (const groupObj of unitAssociatedGroups) {
+
+            const relativeHovaSum =
+              groupObj.groupDetails.serviceType.hovaSum *
+              groupObj.groupInstanceCount /
+              groupObj.groupDetails.assignedCount ;
+            const relativeKevaSum =
+              groupObj.groupDetails.serviceType.kevaSum *
+              groupObj.groupInstanceCount /
+              groupObj.groupDetails.assignedCount;
+            const relativeMiluimSum =
+              groupObj.groupDetails.serviceType.miluimSum *
+              groupObj.groupInstanceCount /
+              groupObj.groupDetails.assignedCount;
+            const relativeCivilianSum =
+              groupObj.groupDetails.serviceType.civilianSum *
+              groupObj.groupInstanceCount /
+              groupObj.groupDetails.assignedCount;
+
             unitYValue +=
-              groupObj.serviceType.hovaSum + groupObj.serviceType.kevaSum +
-              groupObj.serviceType.miluimSum + groupObj.serviceType.civilianSum;
-            hovaSumYValue += groupObj.serviceType.hovaSum;
-            kevaSumYValue += groupObj.serviceType.kevaSum;
-            miluimSumYValue += groupObj.serviceType.miluimSum;
-            civilianSumYValue += groupObj.serviceType.civilianSum;
+              relativeHovaSum + relativeKevaSum +
+              relativeMiluimSum + relativeCivilianSum;
+            hovaSumYValue += relativeHovaSum;
+            kevaSumYValue += relativeKevaSum;
+            miluimSumYValue += relativeMiluimSum;
+            civilianSumYValue += relativeCivilianSum;
           }
 
           // Setting the service type sums
@@ -474,16 +498,41 @@ export class StatisticsUtils {
 
           // Add drilldown data for each unit as the groups associated to the unit
           for (const groupObj of unitAssociatedGroups) {
+
+            const relativeASum =
+              groupObj.groupDetails.rankType.aSum *
+              groupObj.groupInstanceCount /
+              groupObj.groupDetails.assignedCount;
+            const relativeBSum =
+              groupObj.groupDetails.rankType.bSum *
+              groupObj.groupInstanceCount /
+              groupObj.groupDetails.assignedCount;
+            const relativeCSum =
+              groupObj.groupDetails.rankType.cSum *
+              groupObj.groupInstanceCount /
+              groupObj.groupDetails.assignedCount ;
+            const relativeHovaSum =
+              groupObj.groupDetails.rankType.hovaSum *
+              groupObj.groupInstanceCount /
+              groupObj.groupDetails.assignedCount;
+            const relativeMiluimSum =
+              groupObj.groupDetails.rankType.miluimSum *
+              groupObj.groupInstanceCount /
+              groupObj.groupDetails.assignedCount;
+            const relativeCivilianSum =
+              groupObj.groupDetails.rankType.civilianSum *
+              groupObj.groupInstanceCount /
+              groupObj.groupDetails.assignedCount;
+
             unitYValue +=
-              groupObj.rankType.aSum + groupObj.rankType.bSum + groupObj.rankType.cSum +
-              groupObj.rankType.hovaSum + groupObj.rankType.miluimSum +
-              groupObj.rankType.civilianSum;
-            aSumYValue += groupObj.rankType.aSum;
-            bSumYValue += groupObj.rankType.bSum;
-            cSumYValue += groupObj.rankType.cSum;
-            hovaSumYValue += groupObj.rankType.hovaSum;
-            miluimSumYValue += groupObj.rankType.miluimSum;
-            civilianSumYValue += groupObj.rankType.civilianSum;
+              relativeASum + relativeBSum + relativeCSum +
+              relativeHovaSum + relativeMiluimSum + relativeCivilianSum;
+            aSumYValue += relativeASum;
+            bSumYValue += relativeBSum;
+            cSumYValue += relativeCSum;
+            hovaSumYValue += relativeHovaSum;
+            miluimSumYValue += relativeMiluimSum;
+            civilianSumYValue += relativeCivilianSum;
           }
 
           // Setting the rank type sums
