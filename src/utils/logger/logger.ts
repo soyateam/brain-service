@@ -21,7 +21,7 @@ if (process.env.NODE_ENV === 'prod') {
     collection: `${config.serviceName}-log`,
     db: config.logs.connectionStringLogs,
     expireAfterSeconds: config.logs.expiredInSec,
-    tryReconnect: true,
+    tryReconnect: false,
   });
 
   logger.add(mongoLogger);
