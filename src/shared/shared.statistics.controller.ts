@@ -10,12 +10,17 @@ export class StatisticsController {
    * @param statisticsType - The type of statistics to calculate.
    * @param taskId - The id of the task to calculate statistics on.
    */
-  public static calculateStatisticsSum(statisticsType: StatisticsTypes, taskId: string) {
+  public static calculateStatisticsSum(
+    statisticsType: StatisticsTypes, taskId: string, showSubTasks: boolean,
+  ) {
     switch (statisticsType) {
 
       case (StatisticsTypes.Sum):
       case (StatisticsTypes.ServiceSum):
       case (StatisticsTypes.RankSum):
+        if (showSubTasks) {
+          return StatisticsUtils.calculateSubTasksRegularSum(taskId, statisticsType);
+        }
         return StatisticsUtils.calculateRegularSum(taskId, statisticsType);
 
       case (StatisticsTypes.UnitSum):

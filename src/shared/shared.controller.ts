@@ -94,6 +94,7 @@ export class SharedController {
   public static async getStatistics(req: Request, res: Response) {
     const taskId = req.query.taskId as string;
     const statisticsType = req.query.stats as StatisticsTypes;
+    const showSubTasks = req.query.showSubTasks;
 
     // If taskId and statisticsType are given
     if (taskId && statisticsType) {
@@ -102,7 +103,9 @@ export class SharedController {
       if (Object.values(StatisticsTypes).indexOf(statisticsType) !== -1) {
 
         // Calculate the statistic and return it
-        const result = await StatisticsController.calculateStatisticsSum(statisticsType, taskId);
+        const result = await StatisticsController.calculateStatisticsSum(
+          statisticsType, taskId, !!showSubTasks,
+        );
         return res.status(200).send(result);
       }
 

@@ -65,6 +65,14 @@ export class StatisticsUtils {
   }
 
   /**
+   * Get sub tasks of a given task.
+   * @param taskId - Id of the task to get sub tasks from.
+   */
+  public static async getSubTasks(taskId: string) {
+    return await TaskManager.getTasksByParentId(taskId);
+  }
+
+  /**
    * Get all units sum according to all associated groups assigned to some task.
    * @param associategGroups - The associated groups object retrieved
    *                           from getUniqueTaskGroups function.
@@ -113,6 +121,264 @@ export class StatisticsUtils {
     }
 
     return unitAssociatedGroups;
+  }
+
+  /**
+   * Calculate sub tasks statistics of a given task id.
+   * @param taskId - The task id to calculate all sub tasks statistics from.
+   * @param regularSumType - The regular sum statistics type to calculate.
+   */
+  public static async calculateSubTasksRegularSum(taskId: string, regularSumType: StatisticsTypes) {
+    // Get sub tasks of the tasks
+    const subTasks = await StatisticsUtils.getSubTasks(taskId);
+
+    // Statistics object for the charts
+    const statisticsObj: any = { categories: [], series: [] };
+
+    // Set series types by the statistics types
+    switch (regularSumType) {
+      case (StatisticsTypes.Sum):
+        statisticsObj.series = [
+          {
+            name: fromFieldToDisplayName['peopleSum'],
+            data: [],
+          },
+        ];
+
+        break;
+      case (StatisticsTypes.ServiceSum):
+        statisticsObj.series = [
+          {
+            name: fromFieldToDisplayName['hovaSum'],
+            data: [],
+          },
+          {
+            name: fromFieldToDisplayName['kevaSum'],
+            data: [],
+          },
+          {
+            name: fromFieldToDisplayName['miluimSum'],
+            data: [],
+          },
+          {
+            name: fromFieldToDisplayName['civilianSum'],
+            data: [],
+          },
+        ];
+        break;
+      case (StatisticsTypes.RankSum):
+        statisticsObj.series = [
+          {
+            name: fromFieldToDisplayName['aSum'],
+            data: [],
+          },
+          {
+            name: fromFieldToDisplayName['bSum'],
+            data: [],
+          },
+          {
+            name: fromFieldToDisplayName['cSum'],
+            data: [],
+          },
+          {
+            name: fromFieldToDisplayName['hovaSum'],
+            data: [],
+          },
+          {
+            name: fromFieldToDisplayName['miluimSum'],
+            data: [],
+          },
+          {
+            name: fromFieldToDisplayName['civilianSum'],
+            data: [],
+          },
+        ];
+        break;
+    }
+
+    // For each sub task, calculate the statistics
+    for (let index = 0; index < subTasks.length; index += 1) {
+
+      // Calculate statistics values
+      const statisticsValues =
+        await StatisticsUtils.calculateSpecificSubTaskRegularSum(
+          subTasks[index]._id, regularSumType,
+        );
+
+      // Add the task name as category
+      statisticsObj.categories.push(subTasks[index].name);
+
+      // Add statistics values to the series data
+      for (let seriesIndex = 0; seriesIndex < statisticsObj.series.length; seriesIndex += 1) {
+        statisticsObj.series[seriesIndex].data.push(statisticsValues[seriesIndex]);
+      }
+    }
+
+    return statisticsObj;
+  }
+
+  /**
+   * Calculate regular sum on task as sub task of other task.
+   * Returns the statistical values directly (without grouping values for each group as usual).
+   * @param taskId - The task id to calculate regular sum on.
+   * @param regularSumType - The regular sum type to calculate.
+   */
+  public static async calculateSpecificSubTaskRegularSum(
+    taskId: string, regularSumType: StatisticsUtils,
+  ) {
+    // First, get all associated groups on the given task
+    const associatedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId);
+    const associatedGroupsIds = Object.keys(associatedGroups);
+
+    // Explicit statistical values
+    const statisticsValues = [];
+
+    switch (regularSumType) {
+
+      case (StatisticsTypes.Sum):
+
+        // Set sum as 0 for default
+        statisticsValues.push(0);
+
+        // For each group, add it to the categories and set it corresponding sum to the series
+        for (const groupId of associatedGroupsIds) {
+
+          // Calculate relative people sum
+          const relativePeopleSum = (
+            associatedGroups[groupId].groupDetails.peopleSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          statisticsValues[0] += relativePeopleSum;
+        }
+        break;
+
+      case (StatisticsTypes.ServiceSum):
+
+        // Set hovaSum as 0 for default
+        statisticsValues.push(0);
+
+        // Set kevaSum as 0 for default
+        statisticsValues.push(0);
+
+        // Set miluimSum as 0 for default
+        statisticsValues.push(0);
+
+        // Set civilianSum as 0 for default
+        statisticsValues.push(0);
+
+        // For each group, add it to the categories and set it corresponding sum to the series
+        for (const groupId of associatedGroupsIds) {
+
+          // Calculate relative service sums
+          const relativeHovaSum = (
+            associatedGroups[groupId].groupDetails.serviceType.hovaSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeKevaSum = (
+            associatedGroups[groupId].groupDetails.serviceType.kevaSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeMiluimSum = (
+            associatedGroups[groupId].groupDetails.serviceType.miluimSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeCivilianSum = (
+            associatedGroups[groupId].groupDetails.serviceType.civilianSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          statisticsValues[0] += relativeHovaSum;
+          statisticsValues[1] += relativeKevaSum;
+          statisticsValues[2] += relativeMiluimSum;
+          statisticsValues[3] += relativeCivilianSum;
+        }
+        break;
+
+      case (StatisticsTypes.RankSum):
+
+        // Set aSum as 0 for default
+        statisticsValues.push(0);
+
+        // Set bSum as 0 for default
+        statisticsValues.push(0);
+
+        // Set cSum as 0 for default
+        statisticsValues.push(0);
+
+        // Set hovaSum as 0 for default
+        statisticsValues.push(0);
+
+        // Set miluimSum as 0 for default
+        statisticsValues.push(0);
+
+        // Set civilianSum as 0 for default
+        statisticsValues.push(0);
+
+        // For each group, add it to the categories and set it corresponding sum to the series
+        for (const groupId of associatedGroupsIds) {
+
+          // Calculate relative rank sums
+          const relativeASum = (
+            associatedGroups[groupId].groupDetails.rankType.aSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeBSum = (
+            associatedGroups[groupId].groupDetails.rankType.bSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeCSum = (
+            associatedGroups[groupId].groupDetails.rankType.cSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeHovaSum = (
+            associatedGroups[groupId].groupDetails.rankType.hovaSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeMiluimSum = (
+            associatedGroups[groupId].groupDetails.rankType.miluimSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          const relativeCivilianSum = (
+            associatedGroups[groupId].groupDetails.rankType.civilianSum *
+            associatedGroups[groupId].groupInstanceCount /
+            associatedGroups[groupId].groupDetails.assignedCount
+          );
+
+          statisticsValues[0] += relativeASum;
+          statisticsValues[1] += relativeBSum;
+          statisticsValues[2] += relativeCSum;
+          statisticsValues[3] += relativeHovaSum;
+          statisticsValues[4] += relativeMiluimSum;
+          statisticsValues[5] += relativeCivilianSum;
+        }
+        break;
+
+      // Code will never reach here, if so, throw exception to indicate misuse
+      default:
+        throw new Error('Misuse of calculateStatistics method - it should get only regular statistics types');
+
+    }
+
+    return statisticsValues;
   }
 
   /**
