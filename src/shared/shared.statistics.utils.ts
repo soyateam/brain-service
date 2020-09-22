@@ -206,7 +206,10 @@ export class StatisticsUtils {
         );
 
       // Add the task name as category
-      statisticsObj.categories.push(subTasks[index].name);
+      statisticsObj.categories.push({
+        name: subTasks[index].name,
+        id: subTasks[index]._id,
+      });
 
       // Add statistics values to the series data
       for (let seriesIndex = 0; seriesIndex < statisticsObj.series.length; seriesIndex += 1) {
