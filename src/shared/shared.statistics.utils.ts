@@ -209,7 +209,7 @@ export class StatisticsUtils {
       statisticsObj.categories.push({
         name: subTasks[index].name,
         id: subTasks[index]._id,
-        subTaskCounts: subTasks[index].subTasksCount,
+        subTaskCount: subTasks[index].subTasksCount,
       });
 
       // Add statistics values to the series data
