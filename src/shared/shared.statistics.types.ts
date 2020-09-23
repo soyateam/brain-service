@@ -7,6 +7,7 @@ export enum StatisticsTypes {
   UnitSum = 'UnitSum',
   UnitServiceSum = 'UnitServiceSum',
   UnitRankSum = 'UnitRankSum',
+  UnitTaskCount = 'UnitTaskCount',
 }
 
 export const fromFieldToDisplayName = {
@@ -18,4 +19,5 @@ export const fromFieldToDisplayName = {
   aSum: 'א',
   bSum: 'ב',
   cSum: 'ג',
+  unitTaskCount: 'כמות משימות',
 };

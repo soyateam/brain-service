@@ -123,6 +123,36 @@ export class StatisticsUtils {
     return unitAssociatedGroups;
   }
 
+  public static async calculateUnitTasksCount(taskId: string, parentGroupId?: string) {
+
+    const assignedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId);
+    const assignedGroupsIds = Object.keys(assignedGroups);
+
+    const statisticsObj: any = {
+      categories: [],
+      series: [
+        {
+          name: fromFieldToDisplayName['unitTaskCount'],
+          data: [],
+        },
+      ],
+    };
+
+    const filteredGroups = [];
+
+    for (const currGroupId of assignedGroupsIds) {
+      if (assignedGroups[currGroupId].groupDetails.parent === parentGroupId) {
+        statisticsObj.categories.push({
+          id: assignedGroups[currGroupId].groupDetails.kartoffelID,
+          name: assignedGroups[currGroupId].groupDetails.name,
+        });
+        statisticsObj.series[0].data.push(assignedGroups[currGroupId].groupInstanceCount);
+      }
+    }
+
+    return statisticsObj;
+  }
+
   /**
    * Calculate sub tasks statistics of a given task id.
    * @param taskId - The task id to calculate all sub tasks statistics from.

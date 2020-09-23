@@ -95,6 +95,7 @@ export class SharedController {
     const taskId = req.query.taskId as string;
     const statisticsType = req.query.stats as StatisticsTypes;
     const showSubTasks = req.query.showSubTasks;
+    const parentGroupId = req.query.parentGroupId as string | undefined;
 
     // If taskId and statisticsType are given
     if (taskId && statisticsType) {
@@ -104,7 +105,7 @@ export class SharedController {
 
         // Calculate the statistic and return it
         const result = await StatisticsController.calculateStatisticsSum(
-          statisticsType, taskId, !!showSubTasks,
+          statisticsType, taskId, !!showSubTasks, parentGroupId,
         );
         return res.status(200).send(result);
       }
