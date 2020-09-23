@@ -125,8 +125,14 @@ export class StatisticsUtils {
 
   public static async calculateUnitTasksCount(taskId: string, parentGroupId?: string) {
 
-    const assignedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId);
-    const assignedGroupsIds = Object.keys(assignedGroups);
+    let assignedGroups: any = {};
+    let assignedGroupsIds: any = [];
+
+    // Ugly quick fix to allow returning empty information
+    if (taskId !== 'undefined') {
+      assignedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId);
+      assignedGroupsIds = Object.keys(assignedGroups);
+    }
 
     const statisticsObj: any = {
       categories: [],
@@ -137,8 +143,6 @@ export class StatisticsUtils {
         },
       ],
     };
-
-    const filteredGroups = [];
 
     for (const currGroupId of assignedGroupsIds) {
       if (assignedGroups[currGroupId].groupDetails.parent === parentGroupId) {

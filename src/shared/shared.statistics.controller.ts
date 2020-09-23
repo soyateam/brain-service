@@ -10,7 +10,7 @@ export class StatisticsController {
    * @param statisticsType - The type of statistics to calculate.
    * @param taskId - The id of the task to calculate statistics on.
    */
-  public static calculateStatisticsSum(
+  public static async calculateStatisticsSum(
     statisticsType: StatisticsTypes, taskId: string, showSubTasks: boolean, parentGroupId?: string,
   ) {
     switch (statisticsType) {
@@ -19,16 +19,16 @@ export class StatisticsController {
       case (StatisticsTypes.ServiceSum):
       case (StatisticsTypes.RankSum):
         if (showSubTasks) {
-          return StatisticsUtils.calculateSubTasksRegularSum(taskId, statisticsType);
+          return await StatisticsUtils.calculateSubTasksRegularSum(taskId, statisticsType);
         }
         return StatisticsUtils.calculateRegularSum(taskId, statisticsType);
       case (StatisticsTypes.UnitTaskCount):
-        return StatisticsUtils.calculateUnitTasksCount(taskId, parentGroupId);
+        return await StatisticsUtils.calculateUnitTasksCount(taskId, parentGroupId);
 
       case (StatisticsTypes.UnitSum):
       case (StatisticsTypes.UnitServiceSum):
       case (StatisticsTypes.UnitRankSum):
-        return StatisticsUtils.calculateUnitSum(taskId, statisticsType);
+        return await StatisticsUtils.calculateUnitSum(taskId, statisticsType);
     }
   }
 }
