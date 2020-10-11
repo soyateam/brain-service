@@ -1,10 +1,9 @@
 // task.controller
 
 import { Request, Response } from 'express';
-import { InvalidParameter, BadRequest } from '../utils/error';
+import { InvalidParameter, BadRequest, InternalServerError, NotFound } from '../utils/error';
 import { HttpClient } from '../utils/http.client';
 import config from '../config';
-import { IGroup } from './task.interface';
 import { SharedController } from '../shared/shared.controller';
 
 export class TaskController {
@@ -21,19 +20,8 @@ export class TaskController {
    * @param res - Express Response
    */
   public static async getTasksByParentId(req: Request, res: Response) {
-    const tasks =
-      (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}`)).tasks;
-
-    if (tasks) {
-      return res.status(200).send({ tasks });
-    }
-
-    throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
-  }
-
-  public static async getTasksByParentAndType(req: Request, res: Response) {
-    const tasks =
-      (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}/type/${req.params.type}`)).tasks;
+    const tasks = (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}`))
+      .tasks;
 
     if (tasks) {
       return res.status(200).send({ tasks });
@@ -55,8 +43,7 @@ export class TaskController {
         req.body.task.groups = SharedController.toUniqueGroupArray(req.body.task.groups);
       }
 
-      const createdTask = await HttpClient.post(TaskController.tasksUrl,
-                                                { task: req.body.task });
+      const createdTask = await HttpClient.post(TaskController.tasksUrl, { task: req.body.task });
 
       if (createdTask) {
         return res.status(200).send(createdTask);
@@ -72,23 +59,51 @@ export class TaskController {
    * @param res - Express Response
    */
   public static async deleteTask(req: Request, res: Response) {
-    // Get the children of a task to know if it has any.
-    const childTasks = (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.id || 'null'}`)).tasks;
+    // Get the task from task-service.
+    const task = await HttpClient.get(`${TaskController.tasksUrl}/${req.params.id}`);
+    let removedSuccessfully = 0;
 
-    // Checks if there are any children to this task
-    if (childTasks) {
+    // If the task was found.
+    if (task) {
       // If it has children, then its not possible to remove the task.
-      if (childTasks.length > 0) {
+      if (task.subTasksCount > 0) {
         throw new BadRequest(TaskController.ERROR_MESSAGES.BAD_REQUEST);
+
       } else { // If it doesn't have any children, then remove the task.
-        const removedTask = await HttpClient.delete(`${TaskController.tasksUrl}/${req.params.id}`);
+        if (task.groups && task.groups.length > 0) {
+          let removedGroup;
 
-        if (removedTask) {
-          return res.status(200).send(removedTask);
+          for (const currGroup of task.groups) {
+            removedGroup = await HttpClient
+                .put(`${SharedController.groupUrl}/${currGroup.id}`,
+                     { isCountGrow: false });
+            if (removedGroup) {
+              removedSuccessfully += 1;
+            }
+          }
+
+          if (removedSuccessfully === task.groups.length) {
+            const removedTask = await HttpClient.delete(`${TaskController.tasksUrl}/${req.params.id}`);
+
+            if (removedTask) {
+              return res.status(200).send(removedTask);
+            }
+          }
+
+          throw new InternalServerError('Error in the removal of groups.');
+        } else {
+          const removedTask =
+             await HttpClient.delete(`${TaskController.tasksUrl}/${req.params.id}`);
+
+          if (removedTask) {
+            return res.status(200).send(removedTask);
+          }
+
+          throw new InternalServerError('Error in the removal of task.');
         }
-
       }
     }
+
     throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
   }
 
@@ -104,7 +119,7 @@ export class TaskController {
       return res.status(200).send(task);
     }
 
-    throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
+    throw new NotFound(TaskController.ERROR_MESSAGES.TASK_NOT_FOUND);
   }
 
   /**
