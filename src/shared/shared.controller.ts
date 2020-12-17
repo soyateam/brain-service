@@ -117,6 +117,20 @@ export class SharedController {
   }
 
   /**
+   * Get view statistics for the main view.
+   * @param req - Express Request
+   * @param res - Express Response
+   */
+  public static async getViewStatistics(req: Request, res: Response) {
+    const unitFilter = req.query.unitFilter as string;
+    const monthFilter = req.query.monthFilter as string;
+
+    const result = await StatisticsController.calculateViewStatistics(unitFilter, monthFilter);
+
+    return res.status(200).send(result);
+  }
+
+  /**
    * Gets an array of IGroups and returns it without duplicates.
    * @param arr - The array of groups
    */

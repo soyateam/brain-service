@@ -31,4 +31,13 @@ export class StatisticsController {
         return await StatisticsUtils.calculateUnitSum(taskId, statisticsType);
     }
   }
+
+  /**
+   * Calculate view statistics by unit filter and month filter.
+   * @param unitFilter - Unit filter for the calculation.
+   * @param monthFilter - Month filter for the calculation.
+   */
+  public static async calculateViewStatistics(unitFilter: string, monthFilter: string) {
+    return await StatisticsUtils.calculateViewStatistics(unitFilter, monthFilter);
+  }
 }

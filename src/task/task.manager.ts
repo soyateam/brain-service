@@ -31,4 +31,8 @@ export class TaskManager {
     return await HttpClient.get(`${TaskManager.tasksUrl}/${taskId}/children`);
   }
 
+  public static async getTaskChildrenByDepthLevel(taskId: string, depthLevel: number) {
+    return await HttpClient.get(`${TaskManager.tasksUrl}/${taskId}/children/depth/${depthLevel}`);
+  }
+
 }

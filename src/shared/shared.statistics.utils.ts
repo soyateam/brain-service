@@ -2,7 +2,13 @@
 
 import { TaskManager } from '../task/task.manager';
 import { GroupManager } from '../group/group.manager';
-import { fromFieldToDisplayName, StatisticsTypes } from './shared.statistics.types';
+import {
+  fromFieldToDisplayName,
+  StatisticsTypes,
+  majorTasksNameAndId,
+  fromMajorTaskIdToDisplayName,
+  fromMajorTaskIdToDepthLevel,
+} from './shared.statistics.types';
 
 export class StatisticsUtils {
 
@@ -155,6 +161,188 @@ export class StatisticsUtils {
     }
 
     return statisticsObj;
+  }
+
+  /**
+   * Calculate view statistics which shows for each task type,
+   * it's main tasks and next level tasks.
+   * @param unitFilter - Unit filter for the whole tasks statistics.
+   * @param monthFilter - Month filter for the whole tasks statistics.
+   */
+  public static async calculateViewStatistics(unitFilter: string, monthFilter: string) {
+
+    // Create statistics obj
+    const statisticsObj: any = {
+      fullSize: 0,
+    };
+
+    const majorTaskNames = Object.keys(majorTasksNameAndId);
+    const majorTasksChildren: any = {};
+    const uniqueGroups = {};
+
+    // First, get all children tasks from major tasks and gather all unique groups
+    for (const taskName of majorTaskNames) {
+
+      const taskId = (majorTasksNameAndId as any)[taskName];
+
+      const taskWithChildren = await TaskManager.getTaskChildrenByDepthLevel(
+        taskId,
+        (fromMajorTaskIdToDepthLevel as any)[taskId],
+      );
+
+      majorTasksChildren[taskId] = taskWithChildren;
+
+      StatisticsUtils.appendGroupIdsToUniqueGroups(taskWithChildren.groups, uniqueGroups);
+      StatisticsUtils.extractUniqueGroups(taskWithChildren.children, uniqueGroups);
+
+      // tslint:disable-next-line: max-line-length
+      statisticsObj[(fromMajorTaskIdToDisplayName as any)[(majorTasksNameAndId as any)[taskName]]] = {
+        id: (majorTasksNameAndId as any)[taskName],
+        value: 0,
+      };
+    }
+
+    // Second, query for all unique groups data from external service
+    await StatisticsUtils.gatherAllUniqueGroupsData(uniqueGroups);
+
+    // Now, its time for some calculations
+    for (const taskName of majorTaskNames) {
+
+      const taskId = (majorTasksNameAndId as any)[taskName];
+
+      // Calculate in recursive fashion the people sum of each task (direct and indirect children)
+      const calculatedTaskObj =
+        StatisticsUtils.calculateRecursiveTasksPeopleSum(majorTasksChildren[taskId], uniqueGroups);
+
+      statisticsObj[(fromMajorTaskIdToDisplayName as any)[taskId]] = calculatedTaskObj;
+    }
+
+    return statisticsObj;
+  }
+
+  public static calculateRecursiveTasksPeopleSum(
+    taskObj: { name: string, children: any[], value: number, id: string },
+    uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
+  ) {
+
+    // If it a leaf (task without children) can calculate it people sum directly
+    if (taskObj.children.length === 0) {
+
+      return ({
+        id: taskObj.id,
+        name: taskObj.name,
+        children: [],
+        value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),
+      });
+    }
+
+    const currentTaskObj: { name: string, children: any[], value: number, id: string} = {
+      name: taskObj.name,
+      id: taskObj.id,
+      children: [],
+      value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),
+    };
+
+    const currentTaskChildren = [];
+
+    for (let index = 0; index <= taskObj.children.length; index += 1) {
+      const calculatedChildTask =
+        StatisticsUtils.calculateRecursiveTasksPeopleSum(
+          taskObj.children[index],
+          uniqueGroups,
+        );
+
+      currentTaskChildren.push(calculatedChildTask);
+      currentTaskObj.value += calculatedChildTask?.value;
+    }
+
+    currentTaskObj.children = currentTaskChildren;
+
+    return currentTaskObj;
+  }
+
+  /**
+   * Calculate sum of people sum of all unique groups.
+   * @param uniqueGroups - Unique groups object.
+   */
+  public static calculateDirectPeopleSumOfTask(
+    taskObj: any,
+    uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
+  ) {
+
+    const groupsObj = taskObj.groups;
+    let value = 0;
+
+    for (const groupObj of groupsObj) {
+      value +=
+        (1 / uniqueGroups[groupObj.id].groupDetails.assignedCount) *
+        uniqueGroups[groupObj.id].groupDetails.peopleSum;
+    }
+
+    return value;
+  }
+
+  /**
+   * Extract all unique groups from tasks given.
+   * @param tasks - Tasks to get all groups from.
+   * @param uniqueGroups - Unique groups object already contains unique groups.
+   */
+  public static extractUniqueGroups(
+    tasks: any[], uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
+  ) {
+
+    let currentTasks = tasks;
+    let nextTasks: any = [];
+
+    while (currentTasks.length > 0) {
+      for (const task of currentTasks) {
+
+        StatisticsUtils.appendGroupIdsToUniqueGroups(task.groups, uniqueGroups);
+
+        if (task.children.length !== 0) {
+          nextTasks = nextTasks.concat(task.children);
+        }
+      }
+
+      currentTasks = nextTasks;
+      nextTasks = [];
+    }
+  }
+
+  /**
+   * Gather all unique groups ids details by querying the group service.
+   * @param uniqueGroups - Unique groups object.
+   */
+  public static async gatherAllUniqueGroupsData(
+    uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
+  ) {
+    const groupsIds = Object.keys(uniqueGroups);
+
+    const groupsDetails = (await GroupManager.getManyGroups(groupsIds)).groups;
+
+    // Assign each group it's details
+    for (const populatedGroup of groupsDetails) {
+      uniqueGroups[populatedGroup.kartoffelID].groupDetails = populatedGroup;
+    }
+  }
+
+  /**
+   * Append groups ids to unique groups object.
+   * @param groups - Groups to add to unique groups object.
+   * @param uniqueGroups - Unique groups object to update.
+   */
+  public static appendGroupIdsToUniqueGroups(
+    groups: any[],
+    uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
+  ) {
+
+    for (const groupObj of groups) {
+      if (uniqueGroups[groupObj.id]) {
+        uniqueGroups[groupObj.id].groupInstanceCount += 1;
+      } else {
+        uniqueGroups[groupObj.id] = { groupInstanceCount: 1, groupDetails: null };
+      }
+    }
   }
 
   /**

@@ -19,6 +19,11 @@ export class SharedRouter {
       Wrapper.wrapAsync(PermissionHandler.get),
       Wrapper.wrapAsync(SharedController.getStatistics),
     );
+    router.get(
+      '/view',
+      Wrapper.wrapAsync(PermissionHandler.get),
+      Wrapper.wrapAsync(SharedController.getViewStatistics),
+    );
 
     return router;
   }
