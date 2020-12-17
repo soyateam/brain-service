@@ -190,6 +190,8 @@ export class StatisticsUtils {
         (fromMajorTaskIdToDepthLevel as any)[taskId],
       );
 
+      console.log('Tasks with children: ', taskWithChildren);
+
       majorTasksChildren[taskId] = taskWithChildren;
 
       StatisticsUtils.appendGroupIdsToUniqueGroups(taskWithChildren.groups, uniqueGroups);
@@ -197,7 +199,7 @@ export class StatisticsUtils {
 
       // tslint:disable-next-line: max-line-length
       statisticsObj[(fromMajorTaskIdToDisplayName as any)[(majorTasksNameAndId as any)[taskName]]] = {
-        id: (majorTasksNameAndId as any)[taskName],
+        _id: (majorTasksNameAndId as any)[taskName],
         value: 0,
       };
     }
@@ -221,7 +223,7 @@ export class StatisticsUtils {
   }
 
   public static calculateRecursiveTasksPeopleSum(
-    taskObj: { name: string, children: any[], value: number, id: string },
+    taskObj: { name: string, children: any[], value: number, _id: string },
     uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
   ) {
 
@@ -229,23 +231,23 @@ export class StatisticsUtils {
     if (taskObj.children.length === 0) {
 
       return ({
-        id: taskObj.id,
+        _id: taskObj._id,
         name: taskObj.name,
         children: [],
         value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),
       });
     }
 
-    const currentTaskObj: { name: string, children: any[], value: number, id: string} = {
+    const currentTaskObj: { name: string, children: any[], value: number, _id: string} = {
       name: taskObj.name,
-      id: taskObj.id,
+      _id: taskObj._id,
       children: [],
       value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),
     };
 
     const currentTaskChildren = [];
 
-    for (let index = 0; index <= taskObj.children.length; index += 1) {
+    for (let index = 0; index <= taskObj.children.length - 1; index += 1) {
       const calculatedChildTask =
         StatisticsUtils.calculateRecursiveTasksPeopleSum(
           taskObj.children[index],
