@@ -190,8 +190,6 @@ export class StatisticsUtils {
         (fromMajorTaskIdToDepthLevel as any)[taskId],
       );
 
-      console.log('Tasks with children: ', taskWithChildren);
-
       majorTasksChildren[taskId] = taskWithChildren;
 
       StatisticsUtils.appendGroupIdsToUniqueGroups(taskWithChildren.groups, uniqueGroups);
@@ -223,7 +221,7 @@ export class StatisticsUtils {
   }
 
   public static calculateRecursiveTasksPeopleSum(
-    taskObj: { name: string, children: any[], value: number, _id: string },
+    taskObj: { name: string, children: any[], value: number, _id: string, ancestors: string[]},
     uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
   ) {
 
@@ -235,14 +233,16 @@ export class StatisticsUtils {
         name: taskObj.name,
         children: [],
         value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),
+        ancestors: taskObj.ancestors,
       });
     }
 
-    const currentTaskObj: { name: string, children: any[], value: number, _id: string} = {
+    const currentTaskObj: { name: string, children: any[], value: number, _id: string, ancestors: string[]} = {
       name: taskObj.name,
       _id: taskObj._id,
       children: [],
       value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),
+      ancestors: taskObj.ancestors,
     };
 
     const currentTaskChildren = [];
