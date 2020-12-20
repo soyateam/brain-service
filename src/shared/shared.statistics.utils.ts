@@ -245,7 +245,7 @@ export class StatisticsUtils {
 
     const currentTaskChildren = [];
 
-    for (let index = 0; index <= taskObj.children.length; index += 1) {
+    for (let index = 0; index < taskObj.children.length; index += 1) {
       const calculatedChildTask =
         StatisticsUtils.calculateRecursiveTasksPeopleSum(
           taskObj.children[index],
