@@ -215,6 +215,7 @@ export class StatisticsUtils {
         StatisticsUtils.calculateRecursiveTasksPeopleSum(majorTasksChildren[taskId], uniqueGroups);
 
       statisticsObj[(fromMajorTaskIdToDisplayName as any)[taskId]] = calculatedTaskObj;
+      statisticsObj.fullSize += calculatedTaskObj.value;
     }
 
     return statisticsObj;
