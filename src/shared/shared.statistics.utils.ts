@@ -186,8 +186,8 @@ export class StatisticsUtils {
       const taskId = (majorTasksNameAndId as any)[taskName];
 
       const taskWithChildren = await TaskManager.getTaskChildrenByDepthLevel(
-        taskId,
-        (fromMajorTaskIdToDepthLevel as any)[taskId],
+        taskId,        
+        99
       );
 
       majorTasksChildren[taskId] = taskWithChildren;
@@ -228,12 +228,12 @@ export class StatisticsUtils {
 
     // If it a leaf (task without children) can calculate it people sum directly
     if (taskObj.children.length === 0) {
-
+      
       return ({
         _id: taskObj._id,
         name: taskObj.name,
-        children: [],
-        value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),
+        children: [],        
+        value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),        
         ancestors: taskObj.ancestors,
       });
     }
