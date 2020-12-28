@@ -16,6 +16,7 @@ export class StatisticsUtils {
    * Get all unique organization groups associated to given task.
    * (Including direct and indirect organization groups associated to indirect sub tasks)
    * @param taskId - The id of the task to get groups from.
+   * @param dateFilter - Date filter for tasks and groups.
    *
    * @returns
    * Array of objects that each key is the organization group id.
@@ -26,10 +27,10 @@ export class StatisticsUtils {
    *                               of the current given task.
    *          groupDetails - Full group object received from the group-service.
    */
-  public static async getUniqueTaskGroups(taskId: string) {
+  public static async getUniqueTaskGroups(taskId: string, dateFilter?: string) {
 
     // Get the full task object
-    const fullTask = await TaskManager.getTaskById(taskId);
+    const fullTask = await TaskManager.getTaskById(taskId, dateFilter);
 
     // Object which contains all the associated groups
     const associatedGroups: {
@@ -44,7 +45,7 @@ export class StatisticsUtils {
     }
 
     // Get all direct and indirect children of the task
-    const childrenTasks = await TaskManager.getTaskChildren(fullTask._id);
+    const childrenTasks = await TaskManager.getTaskChildren(fullTask._id, dateFilter);
 
     // For each group, add it to the associated group object
     for (const childTask of childrenTasks) {
@@ -59,7 +60,7 @@ export class StatisticsUtils {
 
     // Populate all groups details from group service
     const populatedGroups = (
-      await GroupManager.getManyGroups(Object.keys(associatedGroups))
+      await GroupManager.getManyGroups(Object.keys(associatedGroups), dateFilter)
     ).groups;
 
     // Assign each group it's details
@@ -73,9 +74,10 @@ export class StatisticsUtils {
   /**
    * Get sub tasks of a given task.
    * @param taskId - Id of the task to get sub tasks from.
+   * @param dateFilter - Date filter for the task.
    */
-  public static async getSubTasks(taskId: string) {
-    return await TaskManager.getTasksByParentId(taskId);
+  public static async getSubTasks(taskId: string, dateFilter?: string) {
+    return await TaskManager.getTasksByParentId(taskId, dateFilter);
   }
 
   /**
@@ -83,6 +85,8 @@ export class StatisticsUtils {
    * @param associategGroups - The associated groups object retrieved
    *                           from getUniqueTaskGroups function.
    * @param statisticsType - The statistics type requested.
+   * @param dateFilter - Date filter for the tasks and groups.
+   * 
    * @returns
    *
    * Object which holds:
@@ -98,7 +102,10 @@ export class StatisticsUtils {
    * }
    */
   // tslint:disable-next-line: max-line-length
-  public static async getUnitsSum(associatedGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } }) {
+  public static async getUnitsSum(
+    associatedGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
+    dateFilter?: string,
+  ) {
     const unitNames = new Set<string>();
     const unitAssociatedGroups: any = {};
     const associatedGroupIds = Object.keys(associatedGroups);
@@ -119,7 +126,7 @@ export class StatisticsUtils {
     }
 
     // Request unit sums from group service
-    const unitSums = (await GroupManager.getUnitsSums([...unitNames])).units;
+    const unitSums = (await GroupManager.getUnitsSums([...unitNames], dateFilter)).units;
 
     // Attach each unit sum it corresponding details
     for (const currUnitSum of unitSums) {
@@ -129,14 +136,14 @@ export class StatisticsUtils {
     return unitAssociatedGroups;
   }
 
-  public static async calculateUnitTasksCount(taskId: string, parentGroupId?: string) {
+  public static async calculateUnitTasksCount(taskId: string, parentGroupId?: string, dateFilter?: string) {
 
     let assignedGroups: any = {};
     let assignedGroupsIds: any = [];
 
     // Ugly quick fix to allow returning empty information
     if (taskId !== 'undefined') {
-      assignedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId);
+      assignedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId, dateFilter);
       assignedGroupsIds = Object.keys(assignedGroups);
     }
 
@@ -167,9 +174,9 @@ export class StatisticsUtils {
    * Calculate view statistics which shows for each task type,
    * it's main tasks and next level tasks.
    * @param unitFilter - Unit filter for the whole tasks statistics.
-   * @param monthFilter - Month filter for the whole tasks statistics.
+   * @param dateFilter - Date filter for the whole tasks statistics.
    */
-  public static async calculateViewStatistics(unitFilter: string, monthFilter: string) {
+  public static async calculateViewStatistics(unitFilter: string, dateFilter?: string) {
 
     // Create statistics obj
     const statisticsObj: any = {
@@ -186,8 +193,9 @@ export class StatisticsUtils {
       const taskId = (majorTasksNameAndId as any)[taskName];
 
       const taskWithChildren = await TaskManager.getTaskChildrenByDepthLevel(
-        taskId,        
-        99
+        taskId,
+        99,
+        dateFilter
       );
 
       majorTasksChildren[taskId] = taskWithChildren;
@@ -203,7 +211,7 @@ export class StatisticsUtils {
     }
 
     // Second, query for all unique groups data from external service
-    await StatisticsUtils.gatherAllUniqueGroupsData(uniqueGroups);
+    await StatisticsUtils.gatherAllUniqueGroupsData(uniqueGroups, dateFilter);
 
     // Now, its time for some calculations
     for (const taskName of majorTaskNames) {
@@ -228,12 +236,12 @@ export class StatisticsUtils {
 
     // If it a leaf (task without children) can calculate it people sum directly
     if (taskObj.children.length === 0) {
-      
+
       return ({
         _id: taskObj._id,
         name: taskObj.name,
-        children: [],        
-        value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),        
+        children: [],
+        value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),
         ancestors: taskObj.ancestors,
       });
     }
@@ -315,13 +323,15 @@ export class StatisticsUtils {
   /**
    * Gather all unique groups ids details by querying the group service.
    * @param uniqueGroups - Unique groups object.
+   * @param dateFilter - Date filter for groups.
    */
   public static async gatherAllUniqueGroupsData(
     uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
+    dateFilter?: string,
   ) {
     const groupsIds = Object.keys(uniqueGroups);
 
-    const groupsDetails = (await GroupManager.getManyGroups(groupsIds)).groups;
+    const groupsDetails = (await GroupManager.getManyGroups(groupsIds, dateFilter)).groups;
 
     // Assign each group it's details
     for (const populatedGroup of groupsDetails) {
@@ -352,10 +362,13 @@ export class StatisticsUtils {
    * Calculate sub tasks statistics of a given task id.
    * @param taskId - The task id to calculate all sub tasks statistics from.
    * @param regularSumType - The regular sum statistics type to calculate.
+   * @param dateFilter - Date filter for tasks.
    */
-  public static async calculateSubTasksRegularSum(taskId: string, regularSumType: StatisticsTypes) {
+  public static async calculateSubTasksRegularSum(
+    taskId: string, regularSumType: StatisticsTypes, dateFilter?: string
+  ) {
     // Get sub tasks of the tasks
-    const subTasks = await StatisticsUtils.getSubTasks(taskId);
+    const subTasks = await StatisticsUtils.getSubTasks(taskId, dateFilter);
 
     // Statistics object for the charts
     const statisticsObj: any = { categories: [], series: [] };
@@ -427,7 +440,7 @@ export class StatisticsUtils {
       // Calculate statistics values
       const statisticsValues =
         await StatisticsUtils.calculateSpecificSubTaskRegularSum(
-          subTasks[index]._id, regularSumType,
+          subTasks[index]._id, regularSumType, dateFilter
         );
 
       // Add the task name as category
@@ -451,12 +464,13 @@ export class StatisticsUtils {
    * Returns the statistical values directly (without grouping values for each group as usual).
    * @param taskId - The task id to calculate regular sum on.
    * @param regularSumType - The regular sum type to calculate.
+   * @param dateFilter - Date filter for tasks.
    */
   public static async calculateSpecificSubTaskRegularSum(
-    taskId: string, regularSumType: StatisticsUtils,
+    taskId: string, regularSumType: StatisticsTypes, dateFilter?: string,
   ) {
     // First, get all associated groups on the given task
-    const associatedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId);
+    const associatedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId, dateFilter);
     const associatedGroupsIds = Object.keys(associatedGroups);
 
     // Explicit statistical values
@@ -614,11 +628,15 @@ export class StatisticsUtils {
    * Calculates statistics object for regular sum types (without units) for a given task.
    * @param taskId - The id of the task to calculate statistics on.
    * @param regularSumType - Regular statistics type (from `StatisticsTypes` Enum).
+   * @param dateFilter - Date filter for tasks.
+   * 
    * @returns Usable object for highcharts package containing categories and series objects.
    */
-  public static async calculateRegularSum(taskId: string, regularSumType: StatisticsTypes) {
+  public static async calculateRegularSum(
+    taskId: string, regularSumType: StatisticsTypes, dateFilter?: string,
+  ) {
     // First, get all associated groups on the given task
-    const associatedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId);
+    const associatedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId, dateFilter);
     const associatedGroupsIds = Object.keys(associatedGroups);
 
     // Holds the results of the statistics calculation
@@ -808,15 +826,19 @@ export class StatisticsUtils {
    * Calculates statistics object for unit statistics sum types for a given task.
    * @param taskId - The id of the task to calculate statistics on.
    * @param unitStatisticsType - Unit statistics type (from `StatisticsTypes` Enum).
+   * @param dateFilter - Date filter for tasks and groups.
+   * 
    * @returns Usable object for highcharts package containing categories and series objects.
    */
-  public static async calculateUnitSum(taskId: string, unitStatisticsType: StatisticsTypes) {
+  public static async calculateUnitSum(
+    taskId: string, unitStatisticsType: StatisticsTypes, dateFilter?: string,
+  ) {
     // First, get all associated groups on the given task
-    const associatedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId);
+    const associatedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId, dateFilter);
     const associatedGroupsIds = Object.keys(associatedGroups);
 
     // Get all units sums of the associated groups
-    const unitObj = await StatisticsUtils.getUnitsSum(associatedGroups);
+    const unitObj = await StatisticsUtils.getUnitsSum(associatedGroups, dateFilter);
     const unitNames = Object.keys(unitObj);
     /**
      * Holds the results of the statistics calculation

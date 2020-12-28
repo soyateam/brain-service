@@ -96,6 +96,7 @@ export class SharedController {
     const statisticsType = req.query.stats as StatisticsTypes;
     const showSubTasks = req.query.showSubTasks;
     const parentGroupId = req.query.parentGroupId as string | undefined;
+    const dateFilter = req.query.date as string;
 
     // If taskId and statisticsType are given
     if (taskId && statisticsType) {
@@ -105,7 +106,7 @@ export class SharedController {
 
         // Calculate the statistic and return it
         const result = await StatisticsController.calculateStatisticsSum(
-          statisticsType, taskId, !!showSubTasks, parentGroupId,
+          statisticsType, taskId, !!showSubTasks, parentGroupId, dateFilter,
         );
         return res.status(200).send(result);
       }
@@ -122,10 +123,10 @@ export class SharedController {
    * @param res - Express Response
    */
   public static async getViewStatistics(req: Request, res: Response) {
-    const unitFilter = req.query.unitFilter as string;
-    const monthFilter = req.query.monthFilter as string;
+    const unitFilter = req.query.unit as string;
+    const dateFilter = req.query.date as string;
 
-    const result = await StatisticsController.calculateViewStatistics(unitFilter, monthFilter);
+    const result = await StatisticsController.calculateViewStatistics(unitFilter, dateFilter);
 
     return res.status(200).send(result);
   }

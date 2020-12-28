@@ -11,7 +11,11 @@ export class StatisticsController {
    * @param taskId - The id of the task to calculate statistics on.
    */
   public static async calculateStatisticsSum(
-    statisticsType: StatisticsTypes, taskId: string, showSubTasks: boolean, parentGroupId?: string,
+    statisticsType: StatisticsTypes,
+    taskId: string,
+    showSubTasks: boolean,
+    parentGroupId?: string,
+    dateFilter?: string,
   ) {
     switch (statisticsType) {
 
@@ -19,25 +23,25 @@ export class StatisticsController {
       case (StatisticsTypes.ServiceSum):
       case (StatisticsTypes.RankSum):
         if (showSubTasks) {
-          return await StatisticsUtils.calculateSubTasksRegularSum(taskId, statisticsType);
+          return await StatisticsUtils.calculateSubTasksRegularSum(taskId, statisticsType, dateFilter);
         }
-        return StatisticsUtils.calculateRegularSum(taskId, statisticsType);
+        return StatisticsUtils.calculateRegularSum(taskId, statisticsType, dateFilter);
       case (StatisticsTypes.UnitTaskCount):
-        return await StatisticsUtils.calculateUnitTasksCount(taskId, parentGroupId);
+        return await StatisticsUtils.calculateUnitTasksCount(taskId, parentGroupId, dateFilter);
 
       case (StatisticsTypes.UnitSum):
       case (StatisticsTypes.UnitServiceSum):
       case (StatisticsTypes.UnitRankSum):
-        return await StatisticsUtils.calculateUnitSum(taskId, statisticsType);
+        return await StatisticsUtils.calculateUnitSum(taskId, statisticsType, dateFilter);
     }
   }
 
   /**
    * Calculate view statistics by unit filter and month filter.
    * @param unitFilter - Unit filter for the calculation.
-   * @param monthFilter - Month filter for the calculation.
+   * @param dateFilter - Date filter for the calculation.
    */
-  public static async calculateViewStatistics(unitFilter: string, monthFilter: string) {
-    return await StatisticsUtils.calculateViewStatistics(unitFilter, monthFilter);
+  public static async calculateViewStatistics(unitFilter: string, dateFilter: string) {
+    return await StatisticsUtils.calculateViewStatistics(unitFilter, dateFilter);
   }
 }
