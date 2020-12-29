@@ -145,6 +145,19 @@ export class SharedController {
   }
 
   /**
+   * Get unit filters for group hierarchy tree.
+   * @param req - Express Request
+   * @param res - Express Response
+   */
+  public static async getUnitFilters(req: Request, res: Response) {
+    const dateFilter = req.query.date as string;
+
+    const result = await StatisticsController.getUnitFilters(dateFilter);
+
+    return res.status(200).send(result);
+  }
+
+  /**
    * Gets an array of IGroups and returns it without duplicates.
    * @param arr - The array of groups
    */

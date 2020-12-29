@@ -52,4 +52,12 @@ export class StatisticsController {
   public static async getDateFilters(type: DateFilterTypes) {
     return await StatisticsUtils.getDateFilters(type);
   }
+
+  /**
+   * Get unit filters available (in the group hierarchy tree)
+   * @param dateFilter - Date filter time for the groups.
+   */
+  public static async getUnitFilters(dateFilter?: string) {
+    return await StatisticsUtils.getUnitFilters(dateFilter);
+  }
 }

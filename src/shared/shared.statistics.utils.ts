@@ -383,6 +383,14 @@ export class StatisticsUtils {
   }
 
   /**
+   * Get all available unit filters.
+   * @param dateFilter - Date filter for units groups.
+   */
+  public static async getUnitFilters(dateFilter?: string) {
+    return await GroupManager.getUnits(dateFilter);
+  }
+
+  /**
    * Calculate sub tasks statistics of a given task id.
    * @param taskId - The task id to calculate all sub tasks statistics from.
    * @param regularSumType - The regular sum statistics type to calculate.
