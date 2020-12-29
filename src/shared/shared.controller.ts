@@ -5,7 +5,7 @@ import { HttpClient } from '../utils/http.client';
 import config from '../config';
 import { InvalidParameter, BadRequest } from '../utils/error';
 import { IGroup } from '../task/task.interface';
-import { StatisticsTypes } from './shared.statistics.types';
+import { StatisticsTypes, DateFilterTypes } from './shared.statistics.types';
 import { StatisticsController } from './shared.statistics.controller';
 
 export class SharedController {
@@ -129,6 +129,19 @@ export class SharedController {
     const result = await StatisticsController.calculateViewStatistics(unitFilter, dateFilter);
 
     return res.status(200).send(result);
+  }
+
+  /**
+   * Get date filters for tasks and groups.
+   * @param req - Express Request
+   * @param res - Express Response
+   */
+  public static async getDateFilters(req: Request, res: Response) {
+      const type = req.query.type as DateFilterTypes || DateFilterTypes.Tasks;
+
+      const result = await StatisticsController.getDateFilters(type);
+
+      return res.status(200).send(result);
   }
 
   /**

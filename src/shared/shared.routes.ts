@@ -24,6 +24,11 @@ export class SharedRouter {
       Wrapper.wrapAsync(PermissionHandler.get),
       Wrapper.wrapAsync(SharedController.getViewStatistics),
     );
+    router.get(
+      '/dates',
+      Wrapper.wrapAsync(PermissionHandler.get),
+      Wrapper.wrapAsync(SharedController.getDateFilters)
+    )
 
     return router;
   }

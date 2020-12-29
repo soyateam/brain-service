@@ -34,8 +34,21 @@ export class TaskManager {
     return await HttpClient.get(`${TaskManager.tasksUrl}/${taskId}/children${dateFilter ? `?date=${dateFilter}`: ''}`);
   }
 
+  /**
+   * Get task children by given depth level.
+   * @param taskId - The id of the task.
+   * @param depthLevel - Depth level of the children to return.
+   * @param dateFilter - Date filter for the tasks (from which date the task should be taken from).
+   */
   public static async getTaskChildrenByDepthLevel(taskId: string, depthLevel: number, dateFilter?: string) {
     return await HttpClient.get(`${TaskManager.tasksUrl}/${taskId}/children/depth/${depthLevel}${dateFilter ? `?date=${dateFilter}`: ''}`);
+  }
+
+  /**
+   * Get available date filters for tasks
+   */
+  public static async getDateFilters() {
+    return await HttpClient.get(`${TaskManager.tasksUrl}/dates`);
   }
 
 }

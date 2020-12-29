@@ -33,4 +33,11 @@ export class GroupManager {
   public static async getUnitsSums(unitsNames: string[], dateFilter?: string) {
     return (await HttpClient.post(`${GroupManager.groupsUrl}/unit${dateFilter ? `?date=${dateFilter}`: ''}`, { unitsNames }));
   }
+
+  /**
+   * Get available date filters for tasks
+   */
+  public static async getDateFilters() {
+    return await HttpClient.get(`${GroupManager.groupsUrl}/dates`);
+  }
 }

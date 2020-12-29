@@ -10,6 +10,11 @@ export enum StatisticsTypes {
   UnitTaskCount = 'UnitTaskCount',
 }
 
+export enum DateFilterTypes {
+  Tasks = 'Tasks',
+  Groups = 'Groups',
+}
+
 export const fromFieldToDisplayName = {
   peopleSum: 'כמות אנשים',
   kevaSum: 'קבע',

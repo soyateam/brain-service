@@ -5,6 +5,7 @@ import { GroupManager } from '../group/group.manager';
 import {
   fromFieldToDisplayName,
   StatisticsTypes,
+  DateFilterTypes,
   majorTasksNameAndId,
   fromMajorTaskIdToDisplayName,
   fromMajorTaskIdToDepthLevel,
@@ -356,6 +357,29 @@ export class StatisticsUtils {
         uniqueGroups[groupObj.id] = { groupInstanceCount: 1, groupDetails: null };
       }
     }
+  }
+
+  /**
+   * Get available date filter for given type (tasks/groups)
+   * @param type - Date filter type (tasks/groups).
+   */
+  public static async getDateFilters(type: DateFilterTypes) {
+
+    let dates: string[] = [];
+
+    switch (type) {
+
+      case (DateFilterTypes.Groups):
+        dates = await TaskManager.getDateFilters();
+        break;
+
+      case (DateFilterTypes.Tasks):
+      default:
+        dates = await GroupManager.getDateFilters();
+        break;
+    }
+
+    return dates;
   }
 
   /**

@@ -1,6 +1,6 @@
 // shared.statistics.controller
 
-import { StatisticsTypes } from './shared.statistics.types';
+import { StatisticsTypes, DateFilterTypes } from './shared.statistics.types';
 import { StatisticsUtils } from './shared.statistics.utils';
 
 export class StatisticsController {
@@ -43,5 +43,13 @@ export class StatisticsController {
    */
   public static async calculateViewStatistics(unitFilter: string, dateFilter: string) {
     return await StatisticsUtils.calculateViewStatistics(unitFilter, dateFilter);
+  }
+
+  /**
+   * Get date filters available (for groups/tasks)
+   * @param type - Date filter type (groups/tasks).
+   */
+  public static async getDateFilters(type: DateFilterTypes) {
+    return await StatisticsUtils.getDateFilters(type);
   }
 }
