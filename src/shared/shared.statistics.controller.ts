@@ -41,7 +41,7 @@ export class StatisticsController {
    * @param unitFilter - Unit filter for the calculation.
    * @param dateFilter - Date filter for the calculation.
    */
-  public static async calculateViewStatistics(unitFilter: string, dateFilter: string) {
+  public static async calculateViewStatistics(unitFilter?: string, dateFilter?: string) {
     return await StatisticsUtils.calculateViewStatistics(unitFilter, dateFilter);
   }
 

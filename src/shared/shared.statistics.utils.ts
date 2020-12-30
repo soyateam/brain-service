@@ -177,7 +177,7 @@ export class StatisticsUtils {
    * @param unitFilter - Unit filter for the whole tasks statistics.
    * @param dateFilter - Date filter for the whole tasks statistics.
    */
-  public static async calculateViewStatistics(unitFilter: string, dateFilter?: string) {
+  public static async calculateViewStatistics(unitFilter?: string, dateFilter?: string) {
 
     // Create statistics obj
     const statisticsObj: any = {
@@ -221,7 +221,7 @@ export class StatisticsUtils {
 
       // Calculate in recursive fashion the people sum of each task (direct and indirect children)
       const calculatedTaskObj =
-        StatisticsUtils.calculateRecursiveTasksPeopleSum(majorTasksChildren[taskId], uniqueGroups);
+        StatisticsUtils.calculateRecursiveTasksPeopleSum(majorTasksChildren[taskId], uniqueGroups, unitFilter);
 
       statisticsObj[(fromMajorTaskIdToDisplayName as any)[taskId]] = calculatedTaskObj;
       statisticsObj.fullSize += calculatedTaskObj.value;
@@ -233,6 +233,7 @@ export class StatisticsUtils {
   public static calculateRecursiveTasksPeopleSum(
     taskObj: { name: string, children: any[], value: number, _id: string, ancestors: string[]},
     uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
+    unitFilter?: string,
   ) {
 
     // If it a leaf (task without children) can calculate it people sum directly
@@ -242,7 +243,7 @@ export class StatisticsUtils {
         _id: taskObj._id,
         name: taskObj.name,
         children: [],
-        value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),
+        value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups, unitFilter),
         ancestors: taskObj.ancestors,
       });
     }
@@ -251,7 +252,7 @@ export class StatisticsUtils {
       name: taskObj.name,
       _id: taskObj._id,
       children: [],
-      value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups),
+      value: StatisticsUtils.calculateDirectPeopleSumOfTask(taskObj, uniqueGroups, unitFilter),
       ancestors: taskObj.ancestors,
     };
 
@@ -262,6 +263,7 @@ export class StatisticsUtils {
         StatisticsUtils.calculateRecursiveTasksPeopleSum(
           taskObj.children[index],
           uniqueGroups,
+          unitFilter,
         );
 
       currentTaskChildren.push(calculatedChildTask);
@@ -275,20 +277,38 @@ export class StatisticsUtils {
 
   /**
    * Calculate sum of people sum of all unique groups.
+   * @param taksObj - Task object.
    * @param uniqueGroups - Unique groups object.
+   * @param unitFilter - Unit filter which will count only the groups in the unit provided.
    */
   public static calculateDirectPeopleSumOfTask(
     taskObj: any,
     uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
+    unitFilter?: string,
   ) {
 
     const groupsObj = taskObj.groups;
     let value = 0;
 
-    for (const groupObj of groupsObj) {
-      value +=
-        (1 / uniqueGroups[groupObj.id].groupDetails.assignedCount) *
-        uniqueGroups[groupObj.id].groupDetails.peopleSum;
+    if (unitFilter) {
+
+      for (const groupObj of groupsObj) {
+        if (uniqueGroups[groupObj.id].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
+            groupObj.id === unitFilter) {
+          value +=
+            (1 / uniqueGroups[groupObj.id].groupDetails.assignedCount) *
+            uniqueGroups[groupObj.id].groupDetails.peopleSum;
+        }
+      }
+      
+    } else {
+
+      for (const groupObj of groupsObj) {
+        value +=
+          (1 / uniqueGroups[groupObj.id].groupDetails.assignedCount) *
+          uniqueGroups[groupObj.id].groupDetails.peopleSum;
+      }
+
     }
 
     return value;
@@ -328,7 +348,7 @@ export class StatisticsUtils {
    */
   public static async gatherAllUniqueGroupsData(
     uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
-    dateFilter?: string,
+    dateFilter?: string,    
   ) {
     const groupsIds = Object.keys(uniqueGroups);
 
@@ -343,11 +363,11 @@ export class StatisticsUtils {
   /**
    * Append groups ids to unique groups object.
    * @param groups - Groups to add to unique groups object.
-   * @param uniqueGroups - Unique groups object to update.
+   * @param uniqueGroups - Unique groups object to update.   
    */
   public static appendGroupIdsToUniqueGroups(
     groups: any[],
-    uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
+    uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } }    
   ) {
 
     for (const groupObj of groups) {
