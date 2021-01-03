@@ -118,7 +118,7 @@ export class StatisticsUtils {
       // Add related group to the related unit
       if (unitAssociatedGroups[associatedGroups[currentGroupId].groupDetails.unitName]) {
         unitAssociatedGroups[associatedGroups[currentGroupId].groupDetails.unitName]
-        .associatedGroups.push(associatedGroups[currentGroupId]);
+          .associatedGroups.push(associatedGroups[currentGroupId]);
 
       } else {
         unitAssociatedGroups[associatedGroups[currentGroupId].groupDetails.unitName] =
@@ -231,7 +231,7 @@ export class StatisticsUtils {
   }
 
   public static calculateRecursiveTasksPeopleSum(
-    taskObj: { name: string, children: any[], value: number, _id: string, ancestors: string[]},
+    taskObj: { name: string, children: any[], value: number, _id: string, ancestors: string[] },
     uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
     unitFilter?: string,
   ) {
@@ -248,7 +248,7 @@ export class StatisticsUtils {
       });
     }
 
-    const currentTaskObj: { name: string, children: any[], value: number, _id: string, ancestors: string[]} = {
+    const currentTaskObj: { name: string, children: any[], value: number, _id: string, ancestors: string[] } = {
       name: taskObj.name,
       _id: taskObj._id,
       children: [],
@@ -300,7 +300,7 @@ export class StatisticsUtils {
             uniqueGroups[groupObj.id].groupDetails.peopleSum;
         }
       }
-      
+
     } else {
 
       for (const groupObj of groupsObj) {
@@ -348,7 +348,7 @@ export class StatisticsUtils {
    */
   public static async gatherAllUniqueGroupsData(
     uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } },
-    dateFilter?: string,    
+    dateFilter?: string,
   ) {
     const groupsIds = Object.keys(uniqueGroups);
 
@@ -367,7 +367,7 @@ export class StatisticsUtils {
    */
   public static appendGroupIdsToUniqueGroups(
     groups: any[],
-    uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } }    
+    uniqueGroups: { [id: string]: { groupInstanceCount: number, groupDetails: any } }
   ) {
 
     for (const groupObj of groups) {
@@ -414,10 +414,11 @@ export class StatisticsUtils {
    * Calculate sub tasks statistics of a given task id.
    * @param taskId - The task id to calculate all sub tasks statistics from.
    * @param regularSumType - The regular sum statistics type to calculate.
+   * @param unitFilter - Unit filter for groups.
    * @param dateFilter - Date filter for tasks.
    */
   public static async calculateSubTasksRegularSum(
-    taskId: string, regularSumType: StatisticsTypes, dateFilter?: string
+    taskId: string, regularSumType: StatisticsTypes, unitFilter?: string, dateFilter?: string
   ) {
     // Get sub tasks of the tasks
     const subTasks = await StatisticsUtils.getSubTasks(taskId, dateFilter);
@@ -492,7 +493,7 @@ export class StatisticsUtils {
       // Calculate statistics values
       const statisticsValues =
         await StatisticsUtils.calculateSpecificSubTaskRegularSum(
-          subTasks[index]._id, regularSumType, dateFilter
+          subTasks[index]._id, regularSumType, unitFilter, dateFilter
         );
 
       // Add the task name as category
@@ -516,10 +517,11 @@ export class StatisticsUtils {
    * Returns the statistical values directly (without grouping values for each group as usual).
    * @param taskId - The task id to calculate regular sum on.
    * @param regularSumType - The regular sum type to calculate.
+   * @param unitFilter - Unit filter for groups.
    * @param dateFilter - Date filter for tasks.
    */
   public static async calculateSpecificSubTaskRegularSum(
-    taskId: string, regularSumType: StatisticsTypes, dateFilter?: string,
+    taskId: string, regularSumType: StatisticsTypes, unitFilter?: string, dateFilter?: string,
   ) {
     // First, get all associated groups on the given task
     const associatedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId, dateFilter);
@@ -538,14 +540,28 @@ export class StatisticsUtils {
         // For each group, add it to the categories and set it corresponding sum to the series
         for (const groupId of associatedGroupsIds) {
 
-          // Calculate relative people sum
-          const relativePeopleSum = (
-            associatedGroups[groupId].groupDetails.peopleSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+          if (
+            !unitFilter ||
+            (
+              unitFilter &&
+              (
+                associatedGroups[groupId].groupDetails.ancestors &&
+                associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
+                groupId === unitFilter
+              )              
+            )
+          ) {
 
-          statisticsValues[0] += relativePeopleSum;
+            // Calculate relative people sum
+            const relativePeopleSum = (
+              associatedGroups[groupId].groupDetails.peopleSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
+
+            statisticsValues[0] += relativePeopleSum;
+          }
+
         }
         break;
 
@@ -566,35 +582,47 @@ export class StatisticsUtils {
         // For each group, add it to the categories and set it corresponding sum to the series
         for (const groupId of associatedGroupsIds) {
 
-          // Calculate relative service sums
-          const relativeHovaSum = (
-            associatedGroups[groupId].groupDetails.serviceType.hovaSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+          if (
+            !unitFilter ||
+            (
+              unitFilter &&
+              (
+                associatedGroups[groupId].groupDetails.ancestors &&
+                associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
+                groupId === unitFilter
+              )              
+            )
+          ) {
+            // Calculate relative service sums
+            const relativeHovaSum = (
+              associatedGroups[groupId].groupDetails.serviceType.hovaSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeKevaSum = (
-            associatedGroups[groupId].groupDetails.serviceType.kevaSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeKevaSum = (
+              associatedGroups[groupId].groupDetails.serviceType.kevaSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeMiluimSum = (
-            associatedGroups[groupId].groupDetails.serviceType.miluimSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeMiluimSum = (
+              associatedGroups[groupId].groupDetails.serviceType.miluimSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeCivilianSum = (
-            associatedGroups[groupId].groupDetails.serviceType.civilianSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeCivilianSum = (
+              associatedGroups[groupId].groupDetails.serviceType.civilianSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          statisticsValues[0] += relativeHovaSum;
-          statisticsValues[1] += relativeKevaSum;
-          statisticsValues[2] += relativeMiluimSum;
-          statisticsValues[3] += relativeCivilianSum;
+            statisticsValues[0] += relativeHovaSum;
+            statisticsValues[1] += relativeKevaSum;
+            statisticsValues[2] += relativeMiluimSum;
+            statisticsValues[3] += relativeCivilianSum;
+          }
         }
         break;
 
@@ -621,49 +649,62 @@ export class StatisticsUtils {
         // For each group, add it to the categories and set it corresponding sum to the series
         for (const groupId of associatedGroupsIds) {
 
-          // Calculate relative rank sums
-          const relativeASum = (
-            associatedGroups[groupId].groupDetails.rankType.aSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+          if (
+            !unitFilter ||
+            (
+              unitFilter &&
+              (
+                associatedGroups[groupId].groupDetails.ancestors &&
+                associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
+                groupId === unitFilter
+              )              
+            )
+          ) {
 
-          const relativeBSum = (
-            associatedGroups[groupId].groupDetails.rankType.bSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            // Calculate relative rank sums
+            const relativeASum = (
+              associatedGroups[groupId].groupDetails.rankType.aSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeCSum = (
-            associatedGroups[groupId].groupDetails.rankType.cSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeBSum = (
+              associatedGroups[groupId].groupDetails.rankType.bSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeHovaSum = (
-            associatedGroups[groupId].groupDetails.rankType.hovaSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeCSum = (
+              associatedGroups[groupId].groupDetails.rankType.cSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeMiluimSum = (
-            associatedGroups[groupId].groupDetails.rankType.miluimSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeHovaSum = (
+              associatedGroups[groupId].groupDetails.rankType.hovaSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeCivilianSum = (
-            associatedGroups[groupId].groupDetails.rankType.civilianSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeMiluimSum = (
+              associatedGroups[groupId].groupDetails.rankType.miluimSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          statisticsValues[0] += relativeASum;
-          statisticsValues[1] += relativeBSum;
-          statisticsValues[2] += relativeCSum;
-          statisticsValues[3] += relativeHovaSum;
-          statisticsValues[4] += relativeMiluimSum;
-          statisticsValues[5] += relativeCivilianSum;
+            const relativeCivilianSum = (
+              associatedGroups[groupId].groupDetails.rankType.civilianSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
+
+            statisticsValues[0] += relativeASum;
+            statisticsValues[1] += relativeBSum;
+            statisticsValues[2] += relativeCSum;
+            statisticsValues[3] += relativeHovaSum;
+            statisticsValues[4] += relativeMiluimSum;
+            statisticsValues[5] += relativeCivilianSum;
+          }
         }
         break;
 
@@ -680,12 +721,13 @@ export class StatisticsUtils {
    * Calculates statistics object for regular sum types (without units) for a given task.
    * @param taskId - The id of the task to calculate statistics on.
    * @param regularSumType - Regular statistics type (from `StatisticsTypes` Enum).
+   * @param unitFilter - Unit filter which will count only the groups in the unit provided.
    * @param dateFilter - Date filter for tasks.
    * 
    * @returns Usable object for highcharts package containing categories and series objects.
    */
   public static async calculateRegularSum(
-    taskId: string, regularSumType: StatisticsTypes, dateFilter?: string,
+    taskId: string, regularSumType: StatisticsTypes, unitFilter?: string, dateFilter?: string,
   ) {
     // First, get all associated groups on the given task
     const associatedGroups = await StatisticsUtils.getUniqueTaskGroups(taskId, dateFilter);
@@ -711,15 +753,27 @@ export class StatisticsUtils {
         // For each group, add it to the categories and set it corresponding sum to the series
         for (const groupId of associatedGroupsIds) {
 
-          // Calculate relative people sum
-          const relativePeopleSum = (
-            associatedGroups[groupId].groupDetails.peopleSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+          if (
+            !unitFilter ||
+            (
+              unitFilter &&
+              (
+                associatedGroups[groupId].groupDetails.ancestors &&
+                associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
+                groupId === unitFilter
+              )              
+            )
+          ) {
+            // Calculate relative people sum
+            const relativePeopleSum = (
+              associatedGroups[groupId].groupDetails.peopleSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          statisticsObj.categories.push(associatedGroups[groupId].groupDetails.name);
-          statisticsObj.series[0].data.push(relativePeopleSum);
+            statisticsObj.categories.push(associatedGroups[groupId].groupDetails.name);
+            statisticsObj.series[0].data.push(relativePeopleSum);
+          }
         }
         break;
 
@@ -749,36 +803,49 @@ export class StatisticsUtils {
         // For each group, add it to the categories and set it corresponding sum to the series
         for (const groupId of associatedGroupsIds) {
 
-          // Calculate relative service sums
-          const relativeHovaSum = (
-            associatedGroups[groupId].groupDetails.serviceType.hovaSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+          if (
+            !unitFilter ||
+            (
+              unitFilter &&
+              (
+                associatedGroups[groupId].groupDetails.ancestors &&
+                associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
+                groupId === unitFilter
+              )              
+            )
+          ) {
 
-          const relativeKevaSum = (
-            associatedGroups[groupId].groupDetails.serviceType.kevaSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            // Calculate relative service sums
+            const relativeHovaSum = (
+              associatedGroups[groupId].groupDetails.serviceType.hovaSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeMiluimSum = (
-            associatedGroups[groupId].groupDetails.serviceType.miluimSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeKevaSum = (
+              associatedGroups[groupId].groupDetails.serviceType.kevaSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeCivilianSum = (
-            associatedGroups[groupId].groupDetails.serviceType.civilianSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeMiluimSum = (
+              associatedGroups[groupId].groupDetails.serviceType.miluimSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          statisticsObj.categories.push(associatedGroups[groupId].groupDetails.name);
-          statisticsObj.series[0].data.push(relativeHovaSum);
-          statisticsObj.series[1].data.push(relativeKevaSum);
-          statisticsObj.series[2].data.push(relativeMiluimSum);
-          statisticsObj.series[3].data.push(relativeCivilianSum);
+            const relativeCivilianSum = (
+              associatedGroups[groupId].groupDetails.serviceType.civilianSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
+
+            statisticsObj.categories.push(associatedGroups[groupId].groupDetails.name);
+            statisticsObj.series[0].data.push(relativeHovaSum);
+            statisticsObj.series[1].data.push(relativeKevaSum);
+            statisticsObj.series[2].data.push(relativeMiluimSum);
+            statisticsObj.series[3].data.push(relativeCivilianSum);
+          }
         }
         break;
 
@@ -818,50 +885,63 @@ export class StatisticsUtils {
         // For each group, add it to the categories and set it corresponding sum to the series
         for (const groupId of associatedGroupsIds) {
 
-          // Calculate relative rank sums
-          const relativeASum = (
-            associatedGroups[groupId].groupDetails.rankType.aSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+          if (
+            !unitFilter ||
+            (
+              unitFilter &&
+              (
+                associatedGroups[groupId].groupDetails.ancestors &&
+                associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
+                groupId === unitFilter
+              )              
+            )
+          ) {
 
-          const relativeBSum = (
-            associatedGroups[groupId].groupDetails.rankType.bSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            // Calculate relative rank sums
+            const relativeASum = (
+              associatedGroups[groupId].groupDetails.rankType.aSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeCSum = (
-            associatedGroups[groupId].groupDetails.rankType.cSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeBSum = (
+              associatedGroups[groupId].groupDetails.rankType.bSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeHovaSum = (
-            associatedGroups[groupId].groupDetails.rankType.hovaSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeCSum = (
+              associatedGroups[groupId].groupDetails.rankType.cSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeMiluimSum = (
-            associatedGroups[groupId].groupDetails.rankType.miluimSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeHovaSum = (
+              associatedGroups[groupId].groupDetails.rankType.hovaSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          const relativeCivilianSum = (
-            associatedGroups[groupId].groupDetails.rankType.civilianSum *
-            associatedGroups[groupId].groupInstanceCount /
-            associatedGroups[groupId].groupDetails.assignedCount
-          );
+            const relativeMiluimSum = (
+              associatedGroups[groupId].groupDetails.rankType.miluimSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
 
-          statisticsObj.categories.push(associatedGroups[groupId].groupDetails.name);
-          statisticsObj.series[0].data.push(relativeASum);
-          statisticsObj.series[1].data.push(relativeBSum);
-          statisticsObj.series[2].data.push(relativeCSum);
-          statisticsObj.series[3].data.push(relativeHovaSum);
-          statisticsObj.series[4].data.push(relativeMiluimSum);
-          statisticsObj.series[5].data.push(relativeCivilianSum);
+            const relativeCivilianSum = (
+              associatedGroups[groupId].groupDetails.rankType.civilianSum *
+              associatedGroups[groupId].groupInstanceCount /
+              associatedGroups[groupId].groupDetails.assignedCount
+            );
+
+            statisticsObj.categories.push(associatedGroups[groupId].groupDetails.name);
+            statisticsObj.series[0].data.push(relativeASum);
+            statisticsObj.series[1].data.push(relativeBSum);
+            statisticsObj.series[2].data.push(relativeCSum);
+            statisticsObj.series[3].data.push(relativeHovaSum);
+            statisticsObj.series[4].data.push(relativeMiluimSum);
+            statisticsObj.series[5].data.push(relativeCivilianSum);
+          }
         }
         break;
 
@@ -994,7 +1074,7 @@ export class StatisticsUtils {
             const relativeHovaSum =
               groupObj.groupDetails.serviceType.hovaSum *
               groupObj.groupInstanceCount /
-              groupObj.groupDetails.assignedCount ;
+              groupObj.groupDetails.assignedCount;
             const relativeKevaSum =
               groupObj.groupDetails.serviceType.kevaSum *
               groupObj.groupInstanceCount /
@@ -1079,7 +1159,7 @@ export class StatisticsUtils {
             const relativeCSum =
               groupObj.groupDetails.rankType.cSum *
               groupObj.groupInstanceCount /
-              groupObj.groupDetails.assignedCount ;
+              groupObj.groupDetails.assignedCount;
             const relativeHovaSum =
               groupObj.groupDetails.rankType.hovaSum *
               groupObj.groupInstanceCount /

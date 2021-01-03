@@ -15,6 +15,7 @@ export class StatisticsController {
     taskId: string,
     showSubTasks: boolean,
     parentGroupId?: string,
+    unitFilter?: string,
     dateFilter?: string,
   ) {
     switch (statisticsType) {
@@ -23,9 +24,9 @@ export class StatisticsController {
       case (StatisticsTypes.ServiceSum):
       case (StatisticsTypes.RankSum):
         if (showSubTasks) {
-          return await StatisticsUtils.calculateSubTasksRegularSum(taskId, statisticsType, dateFilter);
+          return await StatisticsUtils.calculateSubTasksRegularSum(taskId, statisticsType, unitFilter, dateFilter);
         }
-        return StatisticsUtils.calculateRegularSum(taskId, statisticsType, dateFilter);
+        return StatisticsUtils.calculateRegularSum(taskId, statisticsType, unitFilter, dateFilter);
       case (StatisticsTypes.UnitTaskCount):
         return await StatisticsUtils.calculateUnitTasksCount(taskId, parentGroupId, dateFilter);
 
