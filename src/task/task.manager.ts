@@ -48,8 +48,8 @@ export class TaskManager {
    * Get all dates available of task by id.
    * @param taskId - The id of the task.
    */
-  public static async getTaskByIdAllDates(taskId: string) {
-    return await HttpClient.get(`${TaskManager.tasksUrl}/${taskId}/dates`);
+  public static async getTaskByIdAllDates(taskId: string, unitFilter?: string) {
+    return await HttpClient.get(`${TaskManager.tasksUrl}/${taskId}/dates${unitFilter ? `?unit=${unitFilter}` : ''}`);
   }
 
   /**

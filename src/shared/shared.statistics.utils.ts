@@ -428,15 +428,26 @@ export class StatisticsUtils {
       statisticsObj.series.push(currTask.sum);
     }
 
-    // Add current date sum
-    const statisticsResultCurrTask = (await StatisticsUtils.calculateSubTasksRegularSum(taskId, StatisticsTypes.Sum)).series[0].data;
-    let currSum = 0;
-    for (let subTaskSum of statisticsResultCurrTask) {
-      currSum += subTaskSum;
-    }
+    // First, get all children tasks from major tasks and gather all unique groups
+    const currentDate = moment().format('YYYY-MM');
+    const uniqueGroups = {};
 
-    statisticsObj.categories.push(moment().format('YYYY-MM'));
-    statisticsObj.series.push(currSum);
+    const taskWithChildren = await TaskManager.getTaskChildrenByDepthLevel(
+      taskId,
+      99
+    );
+
+    StatisticsUtils.appendGroupIdsToUniqueGroups(taskWithChildren.groups, uniqueGroups);
+    StatisticsUtils.extractUniqueGroups(taskWithChildren.children, uniqueGroups);
+
+    await StatisticsUtils.gatherAllUniqueGroupsData(uniqueGroups);
+
+    // Calculate in recursive fashion the people sum of each task (direct and indirect children)
+    const calculatedTaskObj =
+      StatisticsUtils.calculateRecursiveTasksPeopleSum(taskWithChildren, uniqueGroups);
+
+    statisticsObj.categories.push(currentDate);
+    statisticsObj.series.push(calculatedTaskObj.value);
 
     return statisticsObj;
   }
