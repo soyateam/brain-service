@@ -8,6 +8,7 @@ export enum StatisticsTypes {
   UnitServiceSum = 'UnitServiceSum',
   UnitRankSum = 'UnitRankSum',
   UnitTaskCount = 'UnitTaskCount',
+  Timeline = 'Timeline',
 }
 
 export enum DateFilterTypes {

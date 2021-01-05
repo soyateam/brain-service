@@ -34,6 +34,9 @@ export class StatisticsController {
       case (StatisticsTypes.UnitServiceSum):
       case (StatisticsTypes.UnitRankSum):
         return await StatisticsUtils.calculateUnitSum(taskId, statisticsType, dateFilter);
+      
+      case (StatisticsTypes.Timeline):
+        return await StatisticsUtils.calculateTimelineTask(taskId);
     }
   }
 

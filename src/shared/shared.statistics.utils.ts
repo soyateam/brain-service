@@ -1,4 +1,5 @@
 // shared.statistics.utils
+import moment from 'moment';
 
 import { TaskManager } from '../task/task.manager';
 import { GroupManager } from '../group/group.manager';
@@ -408,6 +409,36 @@ export class StatisticsUtils {
    */
   public static async getUnitFilters(dateFilter?: string) {
     return await GroupManager.getUnits(dateFilter);
+  }
+
+  /**
+   * Calculate linear statistics of groups sum for a given task.
+   * @param taskId - The task id to calculate timeline statistics on.
+   */
+  public static async calculateTimelineTask(taskId: string) {    
+    const taskAllDates = (await TaskManager.getTaskByIdAllDates(taskId)).sort((a: any, b: any) => a.date > b.date );    
+
+    const statisticsObj = {
+      categories: [] as any,
+      series: [] as any,
+    };
+
+    for (let currTask of taskAllDates) {
+      statisticsObj.categories.push(currTask.date);
+      statisticsObj.series.push(currTask.sum);
+    }
+
+    // Add current date sum
+    const statisticsResultCurrTask = (await StatisticsUtils.calculateSubTasksRegularSum(taskId, StatisticsTypes.Sum)).series[0].data;
+    let currSum = 0;
+    for (let subTaskSum of statisticsResultCurrTask) {
+      currSum += subTaskSum;
+    }
+
+    statisticsObj.categories.push(moment().format('YYYY-MM'));
+    statisticsObj.series.push(currSum);
+
+    return statisticsObj;
   }
 
   /**
