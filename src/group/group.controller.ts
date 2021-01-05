@@ -13,6 +13,21 @@ export class GroupController {
   private static readonly groupUrl = `${config.groupServiceUrl}/api/group`;
 
   /**
+   * Gets all children groups by their parent group id
+   * from group-service.
+   * @param req - Express Request
+   * @param res - Express Response
+   */
+  public static async getAllChildrenByParent(req: Request, res: Response) {
+    const groups =
+      (await HttpClient.get(`${GroupController.groupUrl}/allChildren/${req.params.id || ''}`));
+
+    if (groups) {
+      return res.status(200).send(groups);
+    }
+  }
+
+  /**
    * Gets groups by the groups parent id
    * from group-service.
    * @param req - Express Request
