@@ -68,7 +68,11 @@ export class SharedController {
 
     if (group) {
       if (req.body.isCountGrow) {
-        oldTask.groups.push({ name: group.name, id: group.kartoffelID });
+        oldTask.groups.push({ 
+          id: group.kartoffelID,
+          name: group.name,
+          isClicked: req.body.isClicked || false,
+        });
       }
 
       // Remove any duplicates if exist.
