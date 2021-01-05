@@ -8,7 +8,12 @@ import { PermissionHandler } from '../permissions/permission.handler';
 export class GroupRouter {
   public static router() {
     const router: Router = Router();
-    
+
+    router.get(
+      '/children/:id?',
+      Wrapper.wrapAsync(PermissionHandler.get),
+      Wrapper.wrapAsync(GroupController.getAllChildrenByParent)
+    );
     router.get(
       '/parent/:id?',
       Wrapper.wrapAsync(PermissionHandler.get),
