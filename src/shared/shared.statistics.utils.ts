@@ -391,12 +391,12 @@ export class StatisticsUtils {
     switch (type) {
 
       case (DateFilterTypes.Groups):
-        dates = await TaskManager.getDateFilters();
+        dates = await GroupManager.getDateFilters();
         break;
 
       case (DateFilterTypes.Tasks):
       default:
-        dates = await GroupManager.getDateFilters();
+        dates = await TaskManager.getDateFilters();
         break;
     }
 
