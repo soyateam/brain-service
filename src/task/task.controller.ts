@@ -135,7 +135,7 @@ export class TaskController {
         delete req.body.task.groups;
       }
 
-      const task = await HttpClient.put(TaskController.tasksUrl, { task: req.body.task });
+      const task = await HttpClient.put(TaskController.tasksUrl, { task: req.body.task, clickedGroupId: req.body.clickedGroupId });
 
       if (task) {
         return res.status(200).send(task);
