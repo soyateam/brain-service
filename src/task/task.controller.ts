@@ -113,7 +113,7 @@ export class TaskController {
    * @param res - Express Response
    */
   public static async getTaskById(req: Request, res: Response) {
-    const task = await HttpClient.get(`${TaskController.tasksUrl}/${req.params.id}`);
+    const task = await HttpClient.get(`${TaskController.tasksUrl}/${req.params.id}${req.query.date ? `?date=${req.query.date}` : ''}`);
 
     if (task) {
       return res.status(200).send(task);

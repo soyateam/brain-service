@@ -295,7 +295,7 @@ export class StatisticsUtils {
 
       for (const groupObj of groupsObj) {
         if (uniqueGroups[groupObj.id].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
-            groupObj.id === unitFilter) {
+          groupObj.id === unitFilter) {
           value +=
             (1 / uniqueGroups[groupObj.id].groupDetails.assignedCount) *
             uniqueGroups[groupObj.id].groupDetails.peopleSum;
@@ -415,8 +415,8 @@ export class StatisticsUtils {
    * Calculate linear statistics of groups sum for a given task.
    * @param taskId - The task id to calculate timeline statistics on.
    */
-  public static async calculateTimelineTask(taskId: string) {    
-    const taskAllDates = (await TaskManager.getTaskByIdAllDates(taskId)).sort((a: any, b: any) => a.date > b.date );    
+  public static async calculateTimelineTask(taskId: string) {
+    const taskAllDates = (await TaskManager.getTaskByIdAllDates(taskId)).sort((a: any, b: any) => a.date > b.date);
 
     const statisticsObj = {
       categories: [] as any,
@@ -437,17 +437,19 @@ export class StatisticsUtils {
       99
     );
 
-    StatisticsUtils.appendGroupIdsToUniqueGroups(taskWithChildren.groups, uniqueGroups);
-    StatisticsUtils.extractUniqueGroups(taskWithChildren.children, uniqueGroups);
+    if (taskWithChildren && Object.keys(taskWithChildren).length !== 0) {
+      StatisticsUtils.appendGroupIdsToUniqueGroups(taskWithChildren.groups, uniqueGroups);
+      StatisticsUtils.extractUniqueGroups(taskWithChildren.children, uniqueGroups);
 
-    await StatisticsUtils.gatherAllUniqueGroupsData(uniqueGroups);
+      await StatisticsUtils.gatherAllUniqueGroupsData(uniqueGroups);
 
-    // Calculate in recursive fashion the people sum of each task (direct and indirect children)
-    const calculatedTaskObj =
-      StatisticsUtils.calculateRecursiveTasksPeopleSum(taskWithChildren, uniqueGroups);
+      // Calculate in recursive fashion the people sum of each task (direct and indirect children)
+      const calculatedTaskObj =
+        StatisticsUtils.calculateRecursiveTasksPeopleSum(taskWithChildren, uniqueGroups);
 
-    statisticsObj.categories.push(currentDate);
-    statisticsObj.series.push(calculatedTaskObj.value);
+      statisticsObj.categories.push(currentDate);
+      statisticsObj.series.push(calculatedTaskObj.value);
+    }
 
     return statisticsObj;
   }
@@ -488,7 +490,7 @@ export class StatisticsUtils {
           {
             name: fromFieldToDisplayName['kevaSum'],
             data: [],
-          },          
+          },
           {
             name: fromFieldToDisplayName['civilianSum'],
             data: [],
@@ -516,7 +518,7 @@ export class StatisticsUtils {
           {
             name: fromFieldToDisplayName['hovaSum'],
             data: [],
-          },          
+          },
           {
             name: fromFieldToDisplayName['civilianSum'],
             data: [],
@@ -586,7 +588,7 @@ export class StatisticsUtils {
                 associatedGroups[groupId].groupDetails.ancestors &&
                 associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
                 groupId === unitFilter
-              )              
+              )
             )
           ) {
 
@@ -625,7 +627,7 @@ export class StatisticsUtils {
                 associatedGroups[groupId].groupDetails.ancestors &&
                 associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
                 groupId === unitFilter
-              )              
+              )
             )
           ) {
             // Calculate relative service sums
@@ -648,7 +650,7 @@ export class StatisticsUtils {
             );
 
             statisticsValues[0] += relativeHovaSum;
-            statisticsValues[1] += relativeKevaSum;            
+            statisticsValues[1] += relativeKevaSum;
             statisticsValues[2] += relativeCivilianSum;
           }
         }
@@ -685,7 +687,7 @@ export class StatisticsUtils {
                 associatedGroups[groupId].groupDetails.ancestors &&
                 associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
                 groupId === unitFilter
-              )              
+              )
             )
           ) {
 
@@ -730,7 +732,7 @@ export class StatisticsUtils {
             statisticsValues[1] += relativeBSum;
             statisticsValues[2] += relativeCSum;
             statisticsValues[3] += relativeDSum;
-            statisticsValues[4] += relativeHovaSum;            
+            statisticsValues[4] += relativeHovaSum;
             statisticsValues[5] += relativeCivilianSum;
           }
         }
@@ -789,7 +791,7 @@ export class StatisticsUtils {
                 associatedGroups[groupId].groupDetails.ancestors &&
                 associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
                 groupId === unitFilter
-              )              
+              )
             )
           ) {
             // Calculate relative people sum
@@ -834,7 +836,7 @@ export class StatisticsUtils {
                 associatedGroups[groupId].groupDetails.ancestors &&
                 associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
                 groupId === unitFilter
-              )              
+              )
             )
           ) {
 
@@ -909,7 +911,7 @@ export class StatisticsUtils {
                 associatedGroups[groupId].groupDetails.ancestors &&
                 associatedGroups[groupId].groupDetails.ancestors.indexOf(unitFilter) !== -1 ||
                 groupId === unitFilter
-              )              
+              )
             )
           ) {
 
@@ -955,7 +957,7 @@ export class StatisticsUtils {
             statisticsObj.series[1].data.push(relativeBSum);
             statisticsObj.series[2].data.push(relativeCSum);
             statisticsObj.series[3].data.push(relativeDSum);
-            statisticsObj.series[4].data.push(relativeHovaSum);            
+            statisticsObj.series[4].data.push(relativeHovaSum);
             statisticsObj.series[5].data.push(relativeCivilianSum);
           }
         }
@@ -1101,13 +1103,13 @@ export class StatisticsUtils {
             unitYValue +=
               relativeHovaSum + relativeKevaSum + relativeCivilianSum;
             hovaSumYValue += relativeHovaSum;
-            kevaSumYValue += relativeKevaSum;            
+            kevaSumYValue += relativeKevaSum;
             civilianSumYValue += relativeCivilianSum;
           }
 
           // Setting the service type sums
           drilldownDataTypes[0].y = hovaSumYValue;
-          drilldownDataTypes[1].y = kevaSumYValue;          
+          drilldownDataTypes[1].y = kevaSumYValue;
           drilldownDataTypes[2].y = civilianSumYValue;
 
           // Setting the data of the drilldown to the service type sums
@@ -1140,7 +1142,7 @@ export class StatisticsUtils {
             { name: fromFieldToDisplayName['bSum'], y: 0 },
             { name: fromFieldToDisplayName['cSum'], y: 0 },
             { name: fromFieldToDisplayName['dSum'], y: 0 },
-            { name: fromFieldToDisplayName['hovaSum'], y: 0 },            
+            { name: fromFieldToDisplayName['hovaSum'], y: 0 },
             { name: fromFieldToDisplayName['civilianSum'], y: 0 },
           ];
 
@@ -1149,7 +1151,7 @@ export class StatisticsUtils {
           let bSumYValue = 0;
           let cSumYValue = 0;
           let dSumYValue = 0;
-          let hovaSumYValue = 0;          
+          let hovaSumYValue = 0;
           let civilianSumYValue = 0;
 
           // Add drilldown data for each unit as the groups associated to the unit
