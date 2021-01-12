@@ -44,8 +44,8 @@ const morganFormatting: any = { prod: 'common', dev: 'dev', test: 'tiny' };
 
 // Middlewares
 app.set('port', process.env.PORT);
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '1000mb' }));
+app.use(bodyParser.json({ limit: '1000mb' }));
 app.use(cookieParser());
 app.use(morgan(morganFormatting[process.env.NODE_ENV || 'dev']));
 app.use(helmet());
