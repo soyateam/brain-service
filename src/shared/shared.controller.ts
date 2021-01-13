@@ -138,7 +138,7 @@ export class SharedController {
           await HttpClient.put(SharedController.taskUrl, { task: oldTask });
         }
 
-        return res.status(200).send(req.body.taskId);
+        return res.status(200).send({ taskId: req.body.taskId });
       }
 
       try {
@@ -151,7 +151,7 @@ export class SharedController {
 
       await HttpClient.put(SharedController.taskUrl, { task: oldTask });
 
-      return res.status(200).send(req.body.taskId);
+      return res.status(200).send({ taskId: req.body.taskId });
     }
 
     // // If the group is need to be deleted.
