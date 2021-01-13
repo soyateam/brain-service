@@ -66,6 +66,7 @@ export class SharedController {
 
       let filteredGroups = [];
       let filteredGroupsIds = [];
+      let isClickedUpdated = false;
       let currentGroup = await HttpClient.get(`${SharedController.groupUrl}/${req.body.kartoffelID}`);
       let childrenCurrentGroups = await HttpClient.get(`${SharedController.groupUrl}/allChildren/${req.body.kartoffelID}`);
       let ancestorsCurrentGroup = [];
@@ -131,7 +132,13 @@ export class SharedController {
       }
 
       if (filteredGroups.length === 0) {
-        return res.status(200).send();
+
+        // If the current group found in the task, but updated it is clicked property.
+        if (currentGroupFoundIndex !== -1) {
+          await HttpClient.put(SharedController.taskUrl, { task: oldTask });
+        }
+
+        return res.status(200).send(req.body.taskId);
       }
 
       try {
@@ -144,7 +151,7 @@ export class SharedController {
 
       await HttpClient.put(SharedController.taskUrl, { task: oldTask });
 
-      return res.status(200).send();
+      return res.status(200).send(req.body.taskId);
     }
 
     // // If the group is need to be deleted.
