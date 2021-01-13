@@ -58,9 +58,25 @@ export class SharedController {
       }
 
       let filteredGroups = [];
+      let filteredGroupsIds = [];
+      let isClickedUpdated = false;
+      let currentGroup = await HttpClient.get(`${SharedController.groupUrl}/${req.body.kartoffelID}`);
+      let childrenCurrentGroups = await HttpClient.get(`${SharedController.groupUrl}/allChildren/${req.body.kartoffelID}`);
+      let ancestorsCurrentGroup = [];
 
-      for (let existsGroup of oldTask.groups) {
+      currentGroup.ancestors.splice(currentGroup.ancestors.length - 1, 1);
 
+      if (currentGroup.ancestors.length > 0) {
+        ancestorsCurrentGroup = await HttpClient.post(`${SharedController.groupUrl}`, { ids: currentGroup.ancestors });
+      }
+      
+      // Check if the current group clicked is already exist in task groups.
+      let currentGroupFoundIndex = -1;
+      for (let index = 0; index < oldTask.groups.length; index += 1) {
+        if (oldTask.groups[index].id === currentGroup.kartoffelID) {
+          currentGroupFoundIndex = index;
+          break;
+        }
       }
     } else { // Group need to be added.
 
@@ -74,7 +90,7 @@ export class SharedController {
       currentGroup.ancestors.splice(currentGroup.ancestors.length - 1, 1);
 
       if (currentGroup.ancestors.length > 0) {
-        ancestorsCurrentGroup = await HttpClient.post(`${SharedController.groupUrl}`, { ids: currentGroup.ancestors });
+        ancestorsCurrentGroup = (await HttpClient.post(`${SharedController.groupUrl}`, { ids: currentGroup.ancestors })).groups;
       }
       
       // Check if the current group clicked is already exist in task groups.
