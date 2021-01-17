@@ -26,6 +26,15 @@ export class GroupManager {
   }
 
   /**
+   * Get main groups sum (which contains the whole sum of main group - including direct and indirect children)
+   * @param unitFilter - Unit filter of the sum to calculate.
+   * @param dateFilter - Date filter of the groups.
+   */
+  public static async getMainGroupsSum(unitFilter?: string, dateFilter?: string) {
+    return (await HttpClient.get(`${GroupManager.groupsUrl}/sum${unitFilter ? `?unit=${unitFilter}`: ''}${dateFilter ? (unitFilter ? `&date=${dateFilter}` : `?date=${dateFilter}`) : ''}`))
+  }
+
+  /**
    * Get all the units exists in the groups hierarchy tree.
    * @param dateFilter - Date filter of the groups.
    */

@@ -183,6 +183,7 @@ export class StatisticsUtils {
     // Create statistics obj
     const statisticsObj: any = {
       fullSize: 0,
+      mainFullSize: (await GroupManager.getMainGroupsSum(unitFilter, dateFilter)).sum,
     };
 
     const majorTaskNames = Object.keys(majorTasksNameAndId);
