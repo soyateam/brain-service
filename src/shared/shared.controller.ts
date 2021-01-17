@@ -69,6 +69,20 @@ export class SharedController {
 
       if (currentGroup.ancestors.length > 0) {
         ancestorsCurrentGroup = (await HttpClient.post(`${SharedController.groupUrl}`, { ids: currentGroup.ancestors })).groups;
+
+        // Make sure the ancestors returned in the same order as the current group ancestors.
+        let tempAncestorsCurrentGroup = [];
+
+        for (let currentAncestor of currentGroup.ancestors) {
+          for (let currIndex = 0; currIndex < ancestorsCurrentGroup.length; currIndex += 1) {
+            if (currentAncestor === ancestorsCurrentGroup[currIndex].kartoffelID) {
+              tempAncestorsCurrentGroup.push(ancestorsCurrentGroup[currIndex]);
+              break;
+            }
+          }
+        }
+
+        ancestorsCurrentGroup = tempAncestorsCurrentGroup;
       }
 
       // Remove the group itself, by adding it to the childrenCurrentGroups
@@ -101,13 +115,36 @@ export class SharedController {
         }
       }
 
-
       // Mark ancestors need to be not deleted
+      let ancestorClicked = false;
+
       for (let currentAncestor of ancestorsCurrentGroup) {
+
+        if (ancestorClicked) {
+          ancestorsToDelete[currentAncestor.kartoffelID] = false;
+        }
+
         for (let childOfAncestor of currentAncestor.children) {
-          for (let groupsToKeepIndex = 0; groupsToKeepIndex < groupsToKeep.length; groupsToKeepIndex += 1) {
-            if (childOfAncestor.kartoffelID === groupsToKeep[groupsToKeepIndex].id) {
-              ancestorsToDelete[childOfAncestor.kartoffelID] = false;
+
+          if (ancestorClicked) {
+            break;
+          }
+
+          for (let groupsToKeepIndex = 0; groupsToKeepIndex < groupsToKeep.length && !ancestorClicked; groupsToKeepIndex += 1) {
+
+            if (
+                (
+                  currentAncestor.kartoffelID === groupsToKeep[groupsToKeepIndex].id &&
+                  groupsToKeep[groupsToKeepIndex].isClicked && 
+                  (ancestorClicked = true) // Tricky hack
+                )
+                ||
+                (
+                  childOfAncestor === groupsToKeep[groupsToKeepIndex].id &&
+                  !ancestorsToDelete[childOfAncestor]
+                )
+              ) {
+              ancestorsToDelete[currentAncestor.kartoffelID] = false;
             }
           }
         }
