@@ -31,20 +31,20 @@ export const fromFieldToDisplayName = {
 export const majorTasksNameAndId = {
   BuildForce: '5f4cc9e2999432a15dbeab31',
   OperativeForce: '5f4cc74c999432075ebeab2f',
-  Wide: '5fc61317fd6cf43fdd293552',
+  // Wide: '5fc61317fd6cf43fdd293552',
   Wrap: '5f689b32fc60a9ebdcaa7cbb',
 };
 
 export const fromMajorTaskIdToDisplayName = {
   '5f4cc74c999432075ebeab2f': 'הפעלת כוח',
   '5f4cc9e2999432a15dbeab31': 'יכולות',
-  '5fc61317fd6cf43fdd293552': 'רוחב',
+  // '5fc61317fd6cf43fdd293552': 'רוחב',
   '5f689b32fc60a9ebdcaa7cbb': 'מעטפת',
 };
 
 export const fromMajorTaskIdToDepthLevel = {
   '5f4cc74c999432075ebeab2f': 2,
   '5f4cc9e2999432a15dbeab31': 2,
-  '5fc61317fd6cf43fdd293552': 1,
+  // '5fc61317fd6cf43fdd293552': 1,
   '5f689b32fc60a9ebdcaa7cbb': 1,
 };
