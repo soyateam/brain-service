@@ -14,26 +14,32 @@ export class SharedRouter {
       Wrapper.wrapAsync(PermissionHandler.createOrUpdate),
       Wrapper.wrapAsync(SharedController.assignGroup),
     );
-    router.get(
-      '/stats',
-      Wrapper.wrapAsync(PermissionHandler.get),
-      Wrapper.wrapAsync(SharedController.getStatistics),
+    router.put(
+      '/task',
+      Wrapper.wrapAsync(PermissionHandler.createOrUpdate),
+      Wrapper.wrapAsync(SharedController.updateTask),
     );
-    router.get(
-      '/view',
-      Wrapper.wrapAsync(PermissionHandler.get),
-      Wrapper.wrapAsync(SharedController.getViewStatistics),
-    );
-    router.get(
-      '/dates',
-      Wrapper.wrapAsync(PermissionHandler.get),
-      Wrapper.wrapAsync(SharedController.getDateFilters),
-    );
-    router.get(
-      '/units',
-      Wrapper.wrapAsync(PermissionHandler.get),
-      Wrapper.wrapAsync(SharedController.getUnitFilters),
-    );
+    /** @deprecated */
+    // router.get(
+    //   '/stats',
+    //   Wrapper.wrapAsync(PermissionHandler.get),
+    //   Wrapper.wrapAsync(SharedController.getStatistics),
+    // );
+    // router.get(
+    //   '/view',
+    //   Wrapper.wrapAsync(PermissionHandler.get),
+    //   Wrapper.wrapAsync(SharedController.getViewStatistics),
+    // );
+    // router.get(
+    //   '/dates',
+    //   Wrapper.wrapAsync(PermissionHandler.get),
+    //   Wrapper.wrapAsync(SharedController.getDateFilters),
+    // );
+    // router.get(
+    //   '/units',
+    //   Wrapper.wrapAsync(PermissionHandler.get),
+    //   Wrapper.wrapAsync(SharedController.getUnitFilters),
+    // );
 
     return router;
   }

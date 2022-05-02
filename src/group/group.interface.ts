@@ -1,6 +1,8 @@
 // group.interface
 
-export interface IGroup {
+import { IBaseModel } from "../generic/generic.interface";
+
+export interface IGroup extends IBaseModel {
   name: string;
   kartoffelID: string;
   ancestors: IGroup[] | string[];
@@ -11,6 +13,7 @@ export interface IGroup {
   serviceType: IServiceType;
   rankType: IRankType;
   assignedCount: number;
+  childrenPopulated?: IGroup[] | [];
 }
 
 export interface IServiceType {
@@ -25,3 +28,5 @@ export interface IRankType {
   cSum: number;
   dSum: number;
 }
+
+export const collectionName = 'group';

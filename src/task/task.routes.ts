@@ -8,11 +8,12 @@ import { PermissionHandler } from '../permissions/permission.handler';
 export class TaskRouter {
   public static router() {
     const router: Router = Router();
-    router.get(
-      '/type/:type',
-      Wrapper.wrapAsync(PermissionHandler.get),
-      Wrapper.wrapAsync(TaskController.getTasksByType),
-    );
+    /** @deprecated */
+    // router.get(
+    //   '/type/:type',
+    //   Wrapper.wrapAsync(PermissionHandler.get),
+    //   Wrapper.wrapAsync(TaskController.getTasksByType),
+    // );
     router.get(
       '/parent/:parentId?',
       Wrapper.wrapAsync(PermissionHandler.get),

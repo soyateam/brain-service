@@ -4,6 +4,8 @@ import { Request, Response } from 'express';
 import { HttpClient } from '../utils/http.client';
 import config from '../config';
 import { NotFound } from '../utils/error';
+import { IGroup } from './group.interface';
+import { GroupRepository } from './group.repository';
 
 export class GroupController {
   private static readonly ERROR_MESSAGES = {
@@ -19,8 +21,14 @@ export class GroupController {
    * @param res - Express Response
    */
   public static async getAllChildrenByParent(req: Request, res: Response) {
-    const groups =
-      (await HttpClient.get(`${GroupController.groupUrl}/allChildren/${req.params.id || ''}`));
+    const groupId = req.params.id ? req.params.id : config.RootGroupAncestorId;
+    const dateFilter = req.query.date as string;
+
+    const groups = await GroupRepository.getAllChildrenByParentId(groupId, dateFilter);
+
+    /** @deprecated */
+    // const groups =
+    //   (await HttpClient.get(`${GroupController.groupUrl}/allChildren/${req.params.id || ''}`));
 
     if (groups) {
       return res.status(200).send(groups);
@@ -34,11 +42,17 @@ export class GroupController {
    * @param res - Express Response
    */
   public static async getGroupsByParent(req: Request, res: Response) {
-    const groups =
-      (await HttpClient.get(`${GroupController.groupUrl}/children/${req.params.id || ''}`));
+    const groupId = req.params.id ? req.params.id : config.RootGroupAncestorId;
+    const dateFilter = req.query.date as string;
+
+    const groups = await GroupRepository.getChildrenByParentId(groupId, dateFilter) as IGroup;
+
+    /** @deprecated */
+    // const groups =
+    //   (await HttpClient.get(`${GroupController.groupUrl}/children/${req.params.id || ''}`));
 
     if (groups) {
-      return res.status(200).send(groups);
+      return res.status(200).send(groups.childrenPopulated);
     }
 
     throw new NotFound(GroupController.ERROR_MESSAGES.INVALID_PARAMETER);
@@ -51,7 +65,13 @@ export class GroupController {
    * @param res - Express Response
    */
   public static async getGroupById(req: Request, res: Response) {
-    const groups = await HttpClient.get(`${GroupController.groupUrl}/${req.params.id}`);
+    const groupId = req.params.id;
+    const dateFilter = req.query.date as string;
+
+    const groups = await GroupRepository.getById(groupId, dateFilter);
+
+    /** @deprecated */
+    // const groups = await HttpClient.get(`${GroupController.groupUrl}/${req.params.id}`);
 
     if (groups) {
       return res.status(200).send(groups);

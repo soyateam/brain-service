@@ -5,6 +5,9 @@ import { InvalidParameter, BadRequest, InternalServerError, NotFound } from '../
 import { HttpClient } from '../utils/http.client';
 import config from '../config';
 import { SharedController } from '../shared/shared.controller';
+import { TaskRepository } from './task.repository';
+import { GroupRepository } from '../group/group.repository';
+import { ITask } from './task.interface';
 
 export class TaskController {
   private static readonly ERROR_MESSAGES = {
@@ -12,7 +15,10 @@ export class TaskController {
     INVALID_PARAMETER: 'Invalid paramter was given.',
     BAD_REQUEST: 'Cannot remove task with children.',
   };
+
+  /** @deprecated */
   private static readonly tasksUrl = `${config.taskServiceUrl}/task`;
+
 
   /**
    * Gets all the tasks of a given parentId.
@@ -20,8 +26,14 @@ export class TaskController {
    * @param res - Express Response
    */
   public static async getTasksByParentId(req: Request, res: Response) {
-    const tasks = (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}`))
-      .tasks;
+    const parentId = req.params.parentId;
+    const dateFilter = req.params.dateFilter as string;
+
+    const tasks = await TaskRepository.getByParentId(parentId, dateFilter);
+
+    /** @deprecated */
+    // const tasks = (await HttpClient.get(`${TaskController.tasksUrl}/parent/${req.params.parentId}`))
+    //   .tasks;
 
     if (tasks) {
       return res.status(200).send({ tasks });
@@ -36,20 +48,41 @@ export class TaskController {
    * @param res - Express Response
    */
   public static async createTask(req: Request, res: Response) {
-    if (!req.body.task) {
+    const taskProperties = req.body.task;
+
+    if (!taskProperties) {
       throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
     } else {
-      if (req.body.task.groups) {
-        req.body.task.groups = SharedController.toUniqueGroupArray(req.body.task.groups);
+      if (taskProperties.groups) {
+        taskProperties.groups = SharedController.toUniqueGroupArray(taskProperties.groups);
       }
 
-      const createdTask = await HttpClient.post(TaskController.tasksUrl, { task: req.body.task });
+      // If it sub task
+      if (taskProperties.parent) {
+        // Find the parent task
+        const parentTask = (await TaskRepository.getById(taskProperties.parent)) as ITask;
 
-      if (createdTask) {
-        return res.status(200).send(createdTask);
+        if (parentTask) {
+          // Attach the ancestors from the parent task to the ancestors of the sub task
+          taskProperties.ancestors = [parentTask._id, ...parentTask.ancestors];
+
+          // Force type of the task to be as the parent's type
+          taskProperties.type = parentTask.type;
+
+          // Create the task
+          const createdTask = await TaskRepository.create(taskProperties);
+
+          if (createdTask) {
+            return res.status(200).send(createdTask);    
+          }
+        }
+
+        // If the task parent value is invalid, throw an error
+        throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
       }
 
-      throw new InvalidParameter(TaskController.ERROR_MESSAGES.INVALID_PARAMETER);
+      // Root task case
+      return await TaskRepository.create(taskProperties);
     }
   }
 
@@ -60,13 +93,13 @@ export class TaskController {
    */
   public static async deleteTask(req: Request, res: Response) {
     // Get the task from task-service.
-    const task = await HttpClient.get(`${TaskController.tasksUrl}/${req.params.id}`);
+    const task = (await TaskRepository.getById(req.params.id)) as ITask;
     let removedSuccessfully = 0;
 
     // If the task was found.
     if (task) {
       // If it has children, then its not possible to remove the task.
-      if (task.subTasksCount > 0) {
+      if (task.subTasksCount && task.subTasksCount > 0) {
         throw new BadRequest(TaskController.ERROR_MESSAGES.BAD_REQUEST);
 
       } else { // If it doesn't have any children, then remove the task.
@@ -74,16 +107,14 @@ export class TaskController {
           let removedGroup;
 
           for (const currGroup of task.groups) {
-            removedGroup = await HttpClient
-                .put(`${SharedController.groupUrl}/${currGroup.id}`,
-                     { isCountGrow: false });
+            removedGroup = (await GroupRepository.updateById(currGroup.id, -1));
             if (removedGroup) {
               removedSuccessfully += 1;
             }
           }
 
           if (removedSuccessfully === task.groups.length) {
-            const removedTask = await HttpClient.delete(`${TaskController.tasksUrl}/${req.params.id}`);
+            const removedTask = await TaskRepository.deleteById(req.params.id);
 
             if (removedTask) {
               return res.status(200).send(removedTask);
@@ -92,8 +123,7 @@ export class TaskController {
 
           throw new InternalServerError('Error in the removal of groups.');
         } else {
-          const removedTask =
-             await HttpClient.delete(`${TaskController.tasksUrl}/${req.params.id}`);
+          const removedTask = (await TaskRepository.deleteById(req.params.id)) as ITask;
 
           if (removedTask) {
             return res.status(200).send(removedTask);
@@ -113,7 +143,13 @@ export class TaskController {
    * @param res - Express Response
    */
   public static async getTaskById(req: Request, res: Response) {
-    const task = await HttpClient.get(`${TaskController.tasksUrl}/${req.params.id}${req.query.date ? `?date=${req.query.date}` : ''}`);
+    const taskId = req.params.id;
+    const dateFilter = req.query.date as string;
+
+    const task = await TaskRepository.getById(taskId, dateFilter);
+
+    /** @deprecated */
+    // const task = await HttpClient.get(`${TaskController.tasksUrl}/${req.params.id}${req.query.date ? `?date=${req.query.date}` : ''}`);
 
     if (task) {
       return res.status(200).send(task);

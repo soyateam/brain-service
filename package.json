@@ -1,7 +1,7 @@
 {
-  "name": "task-service",
+  "name": "brain-service",
   "version": "1.0.0",
-  "description": "Task service for operations on tasks",
+  "description": "Brain service for whole operations",
   "main": "server.js",
   "scripts": {
     "serve": "node -r dotenv/config dist/server.js",
@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/soyateam/task-service.git"
+    "url": "git+https://github.com/soyateam/brain-service.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/soyateam/task-service/issues"
+    "url": "https://github.com/soyateam/brain-service/issues"
   },
-  "homepage": "https://github.com/soyateam/task-service#readme",
+  "homepage": "https://github.com/soyateam/brain-service#readme",
   "dependencies": {
     "axios": "^0.19.2",
     "body-parser": "^1.19.0",
