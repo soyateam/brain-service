@@ -20,7 +20,7 @@ export class GroupRepository {
       kartoffelID, 
       $expr: { 
         $and: [
-          { $eq: [{ $month: '$date' }, currDate.getMonth() + 1] },
+          { $eq: [{ $month: '$date' }, currDate.getMonth()] },
           { $eq: [{ $year: '$date' }, currDate.getFullYear()] }
         ]
       }
@@ -48,7 +48,7 @@ export class GroupRepository {
         $match: {
           $expr: { 
             $and: [
-              { $eq: [{ $month: '$date' }, currDate.getMonth() + 1] },
+              { $eq: [{ $month: '$date' }, currDate.getMonth()] },
               { $eq: [{ $year: '$date' }, currDate.getFullYear()] }
             ]
           }
@@ -82,7 +82,7 @@ export class GroupRepository {
               {
                 $expr: { 
                   $and: [
-                    { $eq: [{ $month: '$date' }, currDate.getMonth() + 1] },
+                    { $eq: [{ $month: '$date' }, currDate.getMonth()] },
                     { $eq: [{ $year: '$date' }, currDate.getFullYear()] }
                   ]
                 }
@@ -123,7 +123,7 @@ export class GroupRepository {
       kartoffelID: pId,
       $expr: { 
         $and: [
-          { $eq: [{ $month: '$date' }, currDate.getMonth() + 1] },
+          { $eq: [{ $month: '$date' }, currDate.getMonth()] },
           { $eq: [{ $year: '$date' }, currDate.getFullYear()] }
         ]
       }  
@@ -132,7 +132,7 @@ export class GroupRepository {
       match: {
         $expr: { 
           $and: [
-            { $eq: [{ $month: '$date' }, currDate.getMonth() + 1] },
+            { $eq: [{ $month: '$date' }, currDate.getMonth()] },
             { $eq: [{ $year: '$date' }, currDate.getFullYear()] }
           ]
         }
@@ -151,7 +151,7 @@ export class GroupRepository {
       ancestors: { $all: [pId] },
       $expr: { 
         $and: [
-          { $eq: [{ $month: '$date' }, currDate.getMonth() + 1] },
+          { $eq: [{ $month: '$date' }, currDate.getMonth()] },
           { $eq: [{ $year: '$date' }, currDate.getFullYear()] }
         ]
       }
@@ -166,7 +166,7 @@ export class GroupRepository {
         kartoffelID: { $in: groups },
         $expr: { 
           $and: [
-            { $eq: [{ $month: '$date' }, currDate.getMonth() + 1] },
+            { $eq: [{ $month: '$date' }, currDate.getMonth()] },
             { $eq: [{ $year: '$date' }, currDate.getFullYear()] }
           ]
         }
@@ -244,7 +244,7 @@ export class GroupRepository {
           unitName, 
           $expr: { 
             $and: [
-              { $eq: [{ $month: '$date' }, currDate.getMonth() + 1] },
+              { $eq: [{ $month: '$date' }, currDate.getMonth()] },
               { $eq: [{ $year: '$date' }, currDate.getFullYear()] }
             ]
           }
