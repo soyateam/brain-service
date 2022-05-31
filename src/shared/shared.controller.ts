@@ -107,7 +107,7 @@ export class SharedController {
       let childrenCurrentGroups = (await GroupRepository.getAllChildrenByParentId(req.body.kartoffelID)) as IGroup[];
       let ancestorsCurrentGroup = [];
 
-      currentGroup.ancestors.splice(currentGroup.ancestors.length - 1, 1);
+      // currentGroup.ancestors.splice(currentGroup.ancestors.length - 1, 1);
 
       if (currentGroup.ancestors.length > 0) {
         ancestorsCurrentGroup = (await GroupRepository.getManyByIds(currentGroup.ancestors as string[]) as any).groups;
